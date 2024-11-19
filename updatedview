@@ -1,0 +1,157 @@
+<style>
+    /* Styling specifically for the grid in this partial view */
+
+    /* Container for the grid */
+    .grid-container {
+        margin: 20px auto;
+        padding: 10px;
+        width: 95%;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Kendo Grid customization */
+    .k-grid {
+        font-size: 14px;
+    }
+
+    .k-grid-header {
+        background-color: #007bff; /* Header background */
+        color: white; /* Header text color */
+        font-weight: bold;
+        border-radius: 8px 8px 0 0; /* Rounded top corners */
+    }
+
+    .k-grid-content {
+        border: 1px solid #ddd;
+        border-radius: 0 0 8px 8px; /* Rounded bottom corners */
+    }
+
+    .k-grouping-row {
+        background-color: #e9ecef;
+        font-weight: bold;
+        font-size: 15px;
+        padding: 10px;
+    }
+
+    /* Sub-grid (detail grid) styling */
+    .k-detail-row {
+        background-color: #f7f7f7;
+        border-left: 2px solid #007bff;
+        border-right: 2px solid #007bff;
+        border-bottom: 2px solid #007bff;
+        margin-top: 5px;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .k-grid td {
+        padding: 10px;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .grid-container {
+            width: 100%;
+            margin: 10px auto;
+            padding: 5px;
+        }
+
+        .k-grid td {
+            padding: 5px;
+        }
+
+        .k-grid-header {
+            font-size: 13px;
+        }
+    }
+</style>
+
+---------------------------------------------------
+
+$(document).ready(function () {
+    $("#gridContainer").html('<div id="adminGrid"></div>'); // Clear container and add grid placeholder
+
+    $("#adminGrid").kendoGrid({
+        dataSource: {
+            transport: {
+                read: {
+                    url: "/UserMenuUsageDetails/GetMainGridData", // Endpoint for main grid data
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        Username: { type: "string" },
+                        PageName: { type: "string" },
+                        PageUrl: { type: "string" },
+                        TotalCount: { type: "number" },
+                        LastAccessDate: { type: "string" },
+                        LastAccessTime: { type: "string" }
+                    }
+                }
+            },
+            pageSize: 10
+        },
+        pageable: {
+            refresh: true,
+            pageSizes: [10, 20, 50],
+            buttonCount: 5
+        },
+        sortable: true,
+        filterable: true,
+        scrollable: true,
+        height: 600, // Adjust height for better fit
+        detailTemplate: kendo.template($("#detail-template").html()), // Expandable sub-grid template
+        detailInit: function (e) {
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/UserMenuUsageDetails/GetPageDetails", // Endpoint for sub-grid data
+                            data: { pageName: e.data.PageName }, // Pass PageName as parameter
+                            dataType: "json"
+                        }
+                    },
+                    schema: {
+                        model: {
+                            fields: {
+                                PageName: { type: "string" },
+                                PageUrl: { type: "string" },
+                                AccessDate: { type: "string" },
+                                AccessTime: { type: "string" },
+                                Count: { type: "number" }
+                            }
+                        }
+                    }
+                },
+                pageable: false,
+                sortable: true,
+                columns: [
+                    { field: "PageName", title: "Page Name", width: "150px" },
+                    { field: "PageUrl", title: "Page URL", width: "250px" },
+                    { field: "AccessDate", title: "Access Date", width: "150px" },
+                    { field: "AccessTime", title: "Access Time", width: "150px" },
+                    { field: "Count", title: "Daily Count", width: "100px" }
+                ]
+            });
+        },
+        columns: [
+            { field: "Username", title: "Username", width: "150px" },
+            { field: "PageName", title: "Page Name", width: "200px" },
+            { field: "PageUrl", title: "Page URL", width: "250px" },
+            { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+            { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+            { field: "TotalCount", title: "Total Count", width: "100px" }
+        ]
+    });
+});
+---------------------------------------------------------------------
+<script type="text/x-kendo-template" id="detail-template">
+    <div>
+        <h5>Details for #: PageName #</h5>
+        <div></div> <!-- Sub-grid will be inserted here -->
+    </div>
+</script>
