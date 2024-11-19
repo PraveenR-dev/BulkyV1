@@ -1,0 +1,182 @@
+public class UserMenuUsageDetailsController : Controller
+{
+    // Main grid data
+    public async Task<ActionResult> GetMainGridData()
+    {
+        var mainGridData = new List<PageUsage>
+        {
+            new PageUsage
+            {
+                Username = "Ramu",
+                PageName = "Saint",
+                PageUrl = "http://example.com/saint",
+                TotalCount = 15,
+                LastAccessDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"),
+                LastAccessTime = DateTime.Now.AddDays(-1).ToString("HH:mm:ss")
+            },
+            new PageUsage
+            {
+                Username = "Ramu",
+                PageName = "Carter",
+                PageUrl = "http://example.com/carter",
+                TotalCount = 25,
+                LastAccessDate = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd"),
+                LastAccessTime = DateTime.Now.AddDays(-2).ToString("HH:mm:ss")
+            }
+        };
+
+        return Json(mainGridData, JsonRequestBehavior.AllowGet);
+    }
+
+    // Sub-grid data
+    public async Task<ActionResult> GetPageDetails(string pageName)
+    {
+        var details = new List<PageDetail>
+        {
+            new PageDetail
+            {
+                PageName = pageName,
+                PageUrl = $"http://example.com/{pageName.ToLower()}",
+                AccessDate = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd"),
+                AccessTime = DateTime.Now.AddDays(-2).ToString("HH:mm:ss"),
+                Count = 10
+            },
+            new PageDetail
+            {
+                PageName = pageName,
+                PageUrl = $"http://example.com/{pageName.ToLower()}",
+                AccessDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"),
+                AccessTime = DateTime.Now.AddDays(-1).ToString("HH:mm:ss"),
+                Count = 5
+            }
+        };
+
+        return Json(details, JsonRequestBehavior.AllowGet);
+    }
+}
+
+public class PageUsage
+{
+    public string Username { get; set; }
+    public string PageName { get; set; }
+    public string PageUrl { get; set; }
+    public int TotalCount { get; set; }
+    public string LastAccessDate { get; set; }
+    public string LastAccessTime { get; set; }
+}
+
+public class PageDetail
+{
+    public string PageName { get; set; }
+    public string PageUrl { get; set; }
+    public string AccessDate { get; set; }
+    public string AccessTime { get; set; }
+    public int Count { get; set; }
+}
+---------------------------------------------------------
+
+$(document).ready(function () {
+    $("#adminGrid").kendoGrid({
+        dataSource: {
+            transport: {
+                read: {
+                    url: "/UserMenuUsageDetails/GetMainGridData", // API for main grid data
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        Username: { type: "string" },
+                        PageName: { type: "string" },
+                        PageUrl: { type: "string" },
+                        TotalCount: { type: "number" },
+                        LastAccessDate: { type: "string" },
+                        LastAccessTime: { type: "string" }
+                    }
+                }
+            },
+            pageSize: 10
+        },
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        scrollable: true,
+        height: 500,
+        detailTemplate: kendo.template($("#detail-template").html()), // Expandable detail row template
+        detailInit: function (e) {
+            // Sub-grid initialization for detailed data
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/UserMenuUsageDetails/GetPageDetails", // API for sub-grid
+                            data: { pageName: e.data.PageName }, // Pass PageName as a parameter
+                            dataType: "json"
+                        }
+                    },
+                    schema: {
+                        model: {
+                            fields: {
+                                PageName: { type: "string" },
+                                PageUrl: { type: "string" },
+                                AccessDate: { type: "string" },
+                                AccessTime: { type: "string" },
+                                Count: { type: "number" }
+                            }
+                        }
+                    }
+                },
+                pageable: false,
+                sortable: true,
+                columns: [
+                    { field: "PageName", title: "Page Name", width: "150px" },
+                    { field: "PageUrl", title: "Page URL", width: "250px" },
+                    { field: "AccessDate", title: "Access Date", width: "150px" },
+                    { field: "AccessTime", title: "Access Time", width: "150px" },
+                    { field: "Count", title: "Daily Count", width: "100px" }
+                ]
+            });
+        },
+        columns: [
+            { field: "Username", title: "Username", width: "150px" },
+            { field: "PageName", title: "Page Name", width: "200px" },
+            { field: "PageUrl", title: "Page URL", width: "250px" },
+            { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+            { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+            { field: "TotalCount", title: "Total Count", width: "100px" }
+        ]
+    });
+});
+
+--------------------------------------------------------------------------------------
+
+<script type="text/x-kendo-template" id="detail-template">
+    <div>
+        <h5>Details for #: PageName #</h5>
+        <div></div> <!-- This div will host the sub-grid -->
+    </div>
+</script>
+
+---------------------------------------------------------------------------------
+
+<style>
+    #adminGrid {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+    }
+
+    .k-grid-header {
+        background-color: #f4f4f4;
+        font-weight: bold;
+    }
+
+    .k-detail-row {
+        background-color: #f9f9f9;
+    }
+
+    .k-grouping-row {
+        background-color: #e9ecef;
+        font-size: 15px;
+    }
+</style>
