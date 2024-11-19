@@ -1,0 +1,85 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9fafb;
+    color: #333;
+}
+
+.grid-container {
+    max-width: 90%;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.grid-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.grid-title {
+    margin-bottom: 10px;
+    font-size: 26px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.grid-toolbar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.grid-toolbar label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.grid-toolbar input {
+    padding: 5px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+}
+
+.grid-toolbar input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.modern-button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modern-button:hover {
+    background-color: #0056b3;
+}
+
+.k-grid-header {
+    background-color: #007bff !important;
+    color: #fff !important;
+    font-weight: bold;
+    text-align: center;
+}
+
+.k-grid-content tr:hover {
+    background-color: #f1f5f9 !important;
+}
