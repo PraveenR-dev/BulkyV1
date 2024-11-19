@@ -1,0 +1,82 @@
+<style>
+    /* General body styling */
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+    }
+
+    /* Center the grid in the page */
+    .grid-container {
+        max-width: 90%;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .grid-title {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .sub-grid-title {
+        margin: 10px 0;
+        font-size: 18px;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    /* Kendo Grid Customization */
+    .k-grid-header {
+        background-color: #007bff !important;
+        color: #fff !important;
+        font-weight: bold;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .k-grid-content {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .k-grouping-row {
+        background-color: #e9ecef;
+        font-weight: bold;
+    }
+
+    .k-detail-row {
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-left: 2px solid #007bff;
+        border-right: 2px solid #007bff;
+        border-bottom: 2px solid #007bff;
+    }
+
+    /* Row hover effect */
+    .k-grid-content tr:hover {
+        background-color: #f1f1f1 !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .grid-container {
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        .grid-title {
+            font-size: 20px;
+        }
+
+        .k-grid-header {
+            font-size: 13px;
+        }
+    }
+</style>
