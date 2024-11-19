@@ -1,0 +1,159 @@
+<div id="partialViewContainer" class="grid-container">
+    <h2 class="grid-title">User Menu Usage</h2>
+    <div class="grid-toolbar">
+        <label>From Date:</label>
+        <input id="fromDate" type="date">
+        <label>To Date:</label>
+        <input id="toDate" type="date">
+        <button id="filterButton">Filter</button>
+    </div>
+    <div id="adminGrid"></div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Initialize the grid
+        $("#adminGrid").kendoGrid({
+            toolbar: ["excel", "pdf"], // Add Export buttons
+            excel: {
+                fileName: "UserMenuUsage.xlsx", // Set Excel file name
+                filterable: true // Enable exporting filtered data
+            },
+            pdf: {
+                fileName: "UserMenuUsage.pdf", // Set PDF file name
+                allPages: true, // Export all grid pages
+                avoidLinks: true, // Avoid links in PDF
+                paperSize: "A4", // Set paper size
+                margin: { top: "1cm", left: "1cm", right: "1cm", bottom: "1cm" },
+                landscape: true, // Set orientation to landscape
+                repeatHeaders: true, // Repeat headers on all pages
+                scale: 0.8 // Adjust the scale of content
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/UserMenuUsageDetails/GetMainGridData", // API endpoint
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        fields: {
+                            Username: { type: "string" },
+                            PageName: { type: "string" },
+                            PageUrl: { type: "string" },
+                            TotalCount: { type: "number" },
+                            LastAccessDate: { type: "date" }, // Ensure it's a date field
+                            LastAccessTime: { type: "string" }
+                        }
+                    }
+                },
+                pageSize: 10
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [5, 10, 20],
+                buttonCount: 5
+            },
+            sortable: true,
+            filterable: true,
+            columns: [
+                { field: "Username", title: "Username", width: "150px" },
+                { field: "PageName", title: "Page Name", width: "200px" },
+                { field: "PageUrl", title: "Page URL", width: "250px" },
+                { field: "TotalCount", title: "Total Count", width: "100px" },
+                { field: "LastAccessDate", title: "Last Access Date", format: "{0:yyyy-MM-dd}", width: "150px" },
+                { field: "LastAccessTime", title: "Last Access Time", width: "150px" }
+            ]
+        });
+
+        // Filter data based on date range
+        $("#filterButton").on("click", function () {
+            var fromDate = $("#fromDate").val();
+            var toDate = $("#toDate").val();
+
+            if (fromDate && toDate) {
+                var grid = $("#adminGrid").data("kendoGrid");
+                var dataSource = grid.dataSource;
+
+                dataSource.filter({
+                    logic: "and",
+                    filters: [
+                        { field: "LastAccessDate", operator: "gte", value: new Date(fromDate) },
+                        { field: "LastAccessDate", operator: "lte", value: new Date(toDate) }
+                    ]
+                });
+            } else {
+                alert("Please select both From Date and To Date.");
+            }
+        });
+    });
+</script>
+
+
+
+----------------------------------------------------------------------
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.grid-container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.grid-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.grid-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.grid-toolbar label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.grid-toolbar input {
+    margin-right: 20px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.grid-toolbar button {
+    padding: 7px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.grid-toolbar button:hover {
+    background-color: #0056b3;
+}
+
+.k-grid .k-grid-toolbar {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 10px;
+}
