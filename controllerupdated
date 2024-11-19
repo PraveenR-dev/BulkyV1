@@ -1,0 +1,109 @@
+public async Task<ActionResult> GetMainGridData()
+{
+    try
+    {
+        // Fetch all data from the API
+        var menuItems = await GetUserMenuItems();
+
+        // Group and structure the data for the main grid
+        var mainGridData = menuItems
+            .GroupBy(m => new { m.Username, m.PageName, m.PageUrl })
+            .Select(g => new PageUsage
+            {
+                Username = g.Key.Username,
+                PageName = g.Key.PageName,
+                PageUrl = g.Key.PageUrl,
+                TotalCount = g.Count(),
+                LastAccessDate = g.Max(m => m.AccessDate).ToString("yyyy-MM-dd"),
+                LastAccessTime = g.Max(m => m.AccessTime).ToString(@"hh\:mm\:ss")
+            })
+            .ToList();
+
+        return Json(mainGridData, JsonRequestBehavior.AllowGet);
+    }
+    catch (Exception e)
+    {
+        Logger.Error($"Error occurred while retrieving main grid data: {e.Message}");
+        return new HttpStatusCodeResult(500, "Failed to retrieve main grid data");
+    }
+}
+------------------------------------------------------------
+public async Task<ActionResult> GetPageDetails(string pageName)
+{
+    try
+    {
+        // Fetch all data from the API
+        var menuItems = await GetUserMenuItems();
+
+        // Filter and structure the data for the sub-grid
+        var details = menuItems
+            .Where(m => m.PageName.Equals(pageName, StringComparison.OrdinalIgnoreCase))
+            .Select(m => new PageDetail
+            {
+                PageName = m.PageName,
+                PageUrl = m.PageUrl,
+                AccessDate = m.AccessDate.ToString("yyyy-MM-dd"),
+                AccessTime = m.AccessTime.ToString(@"hh\:mm\:ss"),
+                Count = m.Count
+            })
+            .ToList();
+
+        return Json(details, JsonRequestBehavior.AllowGet);
+    }
+    catch (Exception e)
+    {
+        Logger.Error($"Error occurred while retrieving sub-grid data for {pageName}: {e.Message}");
+        return new HttpStatusCodeResult(500, "Failed to retrieve sub-grid data");
+    }
+}
+---------------------------------------------------------------
+private async Task<List<MenuItemUsage>> GetUserMenuItems()
+{
+    try
+    {
+        var wi = (WindowsIdentity)HttpContext.User.Identity;
+        using (var wic = wi.Impersonate())
+        {
+            using (var client = new WebClient { UseDefaultCredentials = true })
+            {
+                client.Headers.Add(HttpRequestHeader.ContentType, "application/json; charset=utf-8");
+                var response = client.DownloadString(new Uri(BaseUrl + "/api/UserMenuItemsUsage"));
+                return JsonConvert.DeserializeObject<List<MenuItemUsage>>(response);
+            }
+        }
+    }
+    catch (Exception e)
+    {
+        Logger.Error($"Error occurred while retrieving data from API: {e.Message}");
+        return new List<MenuItemUsage>();
+    }
+}
+---------------------------------------
+public class MenuItemUsage
+{
+    public string Username { get; set; }
+    public string PageName { get; set; }
+    public string PageUrl { get; set; }
+    public DateTime AccessDate { get; set; }
+    public TimeSpan AccessTime { get; set; }
+    public int Count { get; set; }
+}
+----------------------------
+public class PageUsage
+{
+    public string Username { get; set; }
+    public string PageName { get; set; }
+    public string PageUrl { get; set; }
+    public int TotalCount { get; set; }
+    public string LastAccessDate { get; set; }
+    public string LastAccessTime { get; set; }
+}
+----------------------------------
+public class PageDetail
+{
+    public string PageName { get; set; }
+    public string PageUrl { get; set; }
+    public string AccessDate { get; set; }
+    public string AccessTime { get; set; }
+    public int Count { get; set; }
+}
