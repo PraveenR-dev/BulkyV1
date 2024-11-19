@@ -1,0 +1,19 @@
+$(document).ready(function () {
+    // Handle menu item click
+    $("#menuGridLink").on("click", function (e) {
+        e.preventDefault(); // Prevent the default link behavior
+
+        // Load the grid into the #gridContainer div
+        $("#gridContainer").html("<div>Loading...</div>"); // Optional loading message
+        $.ajax({
+            url: "/UserMenuUsageDetails/Grid", // Controller action for rendering the grid
+            type: "GET",
+            success: function (response) {
+                $("#gridContainer").html(response); // Replace the container's content with the grid
+            },
+            error: function () {
+                $("#gridContainer").html("<div>Error loading grid. Please try again.</div>");
+            }
+        });
+    });
+});
