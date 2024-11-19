@@ -1,0 +1,33 @@
+If the package Telerik.UI.for.AspNet.Mvc does not exist in your project or you cannot install it via NuGet, you can still set up Kendo.Mvc manually using the resources provided with your Telerik license. Here's how to proceed step-by-step:
+
+Manual Setup for Kendo.Mvc
+1. Download Telerik UI for ASP.NET MVC
+Access the Telerik Download Site:
+
+Go to Telerik Account Login.
+Log in with your credentials.
+Navigate to Downloads → Telerik UI for ASP.NET MVC.
+Download the installer or zip file for Telerik UI for ASP.NET MVC.
+Extract the Package:
+
+Locate the wrappers/aspnetmvc/Binaries/MVC5/ folder in the downloaded package.
+This folder contains the required Kendo.Mvc.dll.
+2. Add Kendo.Mvc.dll to Your Project
+Copy the DLL:
+
+Locate Kendo.Mvc.dll in Binaries/MVC5/.
+Copy it into your project, preferably in a lib folder (e.g., lib/Kendo/).
+Add Reference:
+
+Right-click your project in Solution Explorer → Add Reference.
+Click Browse and select Kendo.Mvc.dll.
+Ensure it is listed under References in your project.
+3. Include Required Scripts and Styles
+Locate Scripts and Styles:
+
+Inside the downloaded package, navigate to wrappers/aspnetmvc/Content/ for styles and wrappers/aspnetmvc/Scripts/ for JavaScript files.
+Add to Your Project:
+
+Copy these files into your project:
+Styles → Add to Content/Kendo.
+Scripts → Add to Scripts/Kendo.
