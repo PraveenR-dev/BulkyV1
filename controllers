@@ -1,0 +1,74 @@
+public async Task<ActionResult> GetMainGridData()
+{
+    // API URL
+    string apiUrl = "https://example.com/api/menuUsage";
+
+    // Fetch data from the API
+    using (var httpClient = new HttpClient())
+    {
+        var response = await httpClient.GetAsync(apiUrl);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var apiData = await response.Content.ReadAsAsync<List<MenuUsage>>();
+
+            // Process data for the main grid
+            var mainGridData = apiData
+                .GroupBy(m => new { m.Username, m.PageName, m.PageUrl })
+                .Select(g => new PageUsage
+                {
+                    Username = g.Key.Username,
+                    PageName = g.Key.PageName,
+                    PageUrl = g.Key.PageUrl,
+                    TotalCount = g.Count(),
+                    LastAccessDate = g.Max(m => m.AccessDate).ToString("yyyy-MM-dd"),
+                    LastAccessTime = g.Max(m => m.AccessTime).ToString(@"hh\:mm\:ss")
+                })
+                .ToList();
+
+            return Json(mainGridData, JsonRequestBehavior.AllowGet);
+        }
+        else
+        {
+            return new HttpStatusCodeResult((int)response.StatusCode, "Failed to fetch data from API");
+        }
+    }
+}
+
+------------------------------------------------------
+
+public async Task<ActionResult> GetPageDetails(string pageName)
+{
+    // API URL
+    string apiUrl = "https://example.com/api/menuUsage";
+
+    // Fetch data from the API
+    using (var httpClient = new HttpClient())
+    {
+        var response = await httpClient.GetAsync(apiUrl);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var apiData = await response.Content.ReadAsAsync<List<MenuUsage>>();
+
+            // Filter and process data for the sub-grid
+            var details = apiData
+                .Where(m => m.PageName == pageName)
+                .Select(m => new PageDetail
+                {
+                    PageName = m.PageName,
+                    PageUrl = m.PageUrl,
+                    AccessDate = m.AccessDate.ToString("yyyy-MM-dd"),
+                    AccessTime = m.AccessTime.ToString(@"hh\:mm\:ss"),
+                    Count = m.Count
+                })
+                .ToList();
+
+            return Json(details, JsonRequestBehavior.AllowGet);
+        }
+        else
+        {
+            return new HttpStatusCodeResult((int)response.StatusCode, "Failed to fetch data from API");
+        }
+    }
+}
