@@ -1,0 +1,218 @@
+<div id="gridContainer" class="grid-container">
+    <!-- Toolbar for Filters and Export Options -->
+    <div class="toolbar">
+        <div class="filter-section">
+            <label for="fromDate">From Date:</label>
+            <input id="fromDate" type="date" />
+            <label for="toDate">To Date:</label>
+            <input id="toDate" type="date" />
+            <button id="filterButton" class="btn-filter">Apply Filter</button>
+            <button id="clearFilter" class="btn-clear">Clear Filter</button>
+        </div>
+        <div class="export-section">
+            <button id="exportExcel" class="btn-export">Export to Excel</button>
+            <button id="exportPdf" class="btn-export">Export to PDF</button>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div id="adminGrid"></div>
+
+    <!-- Detail Row Template -->
+    <script type="text/x-kendo-template" id="detail-template">
+        <div class="sub-grid-container">
+            <h4>Details for #= PageName #</h4>
+            <div id="detailGrid"></div>
+        </div>
+    </script>
+</div>
+
+
+---------------------------------------------------------
+
+$(document).ready(function () {
+    // Initialize Main Grid
+    $("#adminGrid").kendoGrid({
+        dataSource: {
+            data: @Html.Raw(Json.Encode(Model)), // Pass data from the server
+            schema: {
+                model: {
+                    fields: {
+                        Username: { type: "string" },
+                        PageName: { type: "string" },
+                        PageUrl: { type: "string" },
+                        TotalCount: { type: "number" },
+                        LastAccessDate: { type: "date" },
+                        LastAccessTime: { type: "string" }
+                    }
+                }
+            },
+            pageSize: 10
+        },
+        toolbar: ["excel", "pdf"], // Toolbar for Export options
+        excel: {
+            fileName: "UserMenuUsage.xlsx",
+            filterable: true // Include filtered data in export
+        },
+        pdf: {
+            fileName: "UserMenuUsage.pdf",
+            allPages: true,
+            paperSize: "A4",
+            landscape: true
+        },
+        pageable: {
+            refresh: true,
+            pageSizes: [10, 20, 50],
+            buttonCount: 5
+        },
+        sortable: true,
+        filterable: true,
+        groupable: true, // Enable grouping
+        columnMenu: true, // Enable column menu
+        scrollable: true,
+        height: 500,
+        detailTemplate: kendo.template($("#detail-template").html()), // Detail row template
+        detailInit: function (e) {
+            // Sub-grid initialization
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/UserMenuUsageDetails/GetPageDetails",
+                            data: { pageName: e.data.PageName }, // Pass PageName as a parameter
+                            dataType: "json"
+                        }
+                    },
+                    schema: {
+                        model: {
+                            fields: {
+                                PageName: { type: "string" },
+                                PageUrl: { type: "string" },
+                                AccessDate: { type: "date" },
+                                AccessTime: { type: "string" },
+                                Count: { type: "number" }
+                            }
+                        }
+                    }
+                },
+                pageable: false,
+                sortable: true,
+                columns: [
+                    { field: "PageName", title: "Page Name", width: "150px" },
+                    { field: "PageUrl", title: "Page URL", width: "250px" },
+                    { field: "AccessDate", title: "Access Date", format: "{0:yyyy-MM-dd}", width: "150px" },
+                    { field: "AccessTime", title: "Access Time", width: "150px" },
+                    { field: "Count", title: "Daily Count", width: "100px" }
+                ]
+            });
+        },
+        columns: [
+            { field: "Username", title: "Username", width: "150px" },
+            { field: "PageName", title: "Page Name", width: "200px" },
+            { field: "PageUrl", title: "Page URL", width: "250px" },
+            { field: "TotalCount", title: "Total Count", width: "100px" },
+            { field: "LastAccessDate", title: "Last Access Date", format: "{0:yyyy-MM-dd}", width: "150px" },
+            { field: "LastAccessTime", title: "Last Access Time", width: "150px" }
+        ]
+    });
+
+    // Apply Date Filters
+    $("#filterButton").on("click", function () {
+        var fromDate = $("#fromDate").val();
+        var toDate = $("#toDate").val();
+
+        if (fromDate && toDate) {
+            var grid = $("#adminGrid").data("kendoGrid");
+            grid.dataSource.filter({
+                logic: "and",
+                filters: [
+                    { field: "LastAccessDate", operator: "gte", value: new Date(fromDate) },
+                    { field: "LastAccessDate", operator: "lte", value: new Date(toDate) }
+                ]
+            });
+        } else {
+            alert("Please select both From Date and To Date.");
+        }
+    });
+
+    // Clear Filters
+    $("#clearFilter").on("click", function () {
+        var grid = $("#adminGrid").data("kendoGrid");
+        grid.dataSource.filter([]); // Clear all filters
+        $("#fromDate").val("");
+        $("#toDate").val("");
+    });
+
+    // Export to Excel
+    $("#exportExcel").on("click", function () {
+        var grid = $("#adminGrid").data("kendoGrid");
+        grid.saveAsExcel();
+    });
+
+    // Export to PDF
+    $("#exportPdf").on("click", function () {
+        var grid = $("#adminGrid").data("kendoGrid");
+        grid.saveAsPDF();
+    });
+});
+----------------------------------------------------------------------
+
+/* Grid Container */
+.grid-container {
+    max-width: 90%;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+/* Toolbar Section */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+}
+
+.toolbar label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.toolbar input {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.toolbar .btn-filter,
+.toolbar .btn-clear,
+.toolbar .btn-export {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.toolbar .btn-filter:hover,
+.toolbar .btn-clear:hover,
+.toolbar .btn-export:hover {
+    background-color: #0056b3;
+}
+
+/* Sub-Grid Container */
+.sub-grid-container {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
