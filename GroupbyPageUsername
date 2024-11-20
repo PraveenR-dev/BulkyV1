@@ -1,0 +1,129 @@
+$(document).ready(function () {
+    $("#adminGrid").kendoGrid({
+        dataSource: {
+            transport: {
+                read: {
+                    url: "/UserMenuUsageDetails/GetMainGridData", // API for main grid data
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        Username: { type: "string" },
+                        PageName: { type: "string" },
+                        PageUrl: { type: "string" },
+                        TotalCount: { type: "number" },
+                        LastAccessDate: { type: "date" },
+                        LastAccessTime: { type: "string" }
+                    }
+                }
+            },
+            aggregate: [
+                { field: "TotalCount", aggregate: "sum" } // Aggregate total count
+            ],
+            pageSize: 10
+        },
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        scrollable: true,
+        groupable: true, // Enable grouping by user
+        height: 600,
+        groupHeaderTemplate: function (data) {
+            // Add total count dynamically to the group header
+            return `${data.field}: ${data.value} (Total Count: ${data.aggregates.TotalCount.sum})`;
+        },
+        detailTemplate: kendo.template($("#detail-template").html()), // Expandable detail row template
+        detailInit: function (e) {
+            // Sub-grid initialization for detailed data
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/UserMenuUsageDetails/GetPageDetails", // API for sub-grid
+                            data: { pageName: e.data.PageName }, // Pass PageName as a parameter
+                            dataType: "json"
+                        }
+                    },
+                    schema: {
+                        model: {
+                            fields: {
+                                PageName: { type: "string" },
+                                PageUrl: { type: "string" },
+                                AccessDate: { type: "date" },
+                                AccessTime: { type: "string" },
+                                Count: { type: "number" }
+                            }
+                        }
+                    }
+                },
+                pageable: false,
+                sortable: true,
+                columns: [
+                    { field: "PageName", title: "Page Name", width: "150px" },
+                    { field: "PageUrl", title: "Page URL", width: "250px" },
+                    { field: "AccessDate", title: "Access Date", format: "{0:yyyy-MM-dd}", width: "150px" },
+                    { field: "AccessTime", title: "Access Time", width: "150px" },
+                    { field: "Count", title: "Daily Count", width: "100px" }
+                ]
+            });
+        },
+        columns: [
+            { field: "Username", title: "Username", width: "150px" },
+            { field: "PageName", title: "Page Name", width: "200px" },
+            { field: "PageUrl", title: "Page URL", width: "250px" },
+            { field: "LastAccessDate", title: "Last Access Date", format: "{0:yyyy-MM-dd}", width: "150px" },
+            { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+            { field: "TotalCount", title: "Total Count", width: "100px", aggregates: ["sum"] }
+        ]
+    });
+});
+-----------------------------------------------------
+
+<div id="gridContainer" class="grid-container">
+    <!-- Main Grid -->
+    <div id="adminGrid"></div>
+
+    <!-- Detail Row Template -->
+    <script type="text/x-kendo-template" id="detail-template">
+        <div>
+            <h5>Details for #: PageName #</h5>
+            <div></div> <!-- This div will host the sub-grid -->
+        </div>
+    </script>
+</div>
+
+-------------------------------------------
+
+.grid-container {
+    max-width: 95%;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#adminGrid {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+}
+
+.k-grid-header {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    font-size: 15px;
+    color: #333;
+}
+
+.k-detail-row {
+    background-color: #f9f9f9;
+}
+
+.k-grouping-row {
+    background-color: #e9ecef;
+    font-size: 15px;
+    color: #555;
+    font-weight: bold;
+}
