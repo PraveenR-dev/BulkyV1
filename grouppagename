@@ -1,0 +1,168 @@
+<div id="gridContainer" class="grid-container">
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="filter-section">
+            <label for="fromDate">From Date:</label>
+            <input id="fromDate" type="date" />
+            <label for="toDate">To Date:</label>
+            <input id="toDate" type="date" />
+            <button id="filterButton" class="btn-filter">Apply Filter</button>
+            <button id="clearFilter" class="btn-clear">Clear Filter</button>
+        </div>
+        <div class="export-section">
+            <button id="exportExcel" class="btn-export">Export to Excel</button>
+            <button id="exportPdf" class="btn-export">Export to PDF</button>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div id="adminGrid"></div>
+</div>
+--------------------------------------------
+
+$(document).ready(function () {
+    // Initialize the Kendo Grid
+    $("#adminGrid").kendoGrid({
+        dataSource: {
+            transport: {
+                read: {
+                    url: "/MenuUsage/GetData", // Replace with your API endpoint
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        UserName: { type: "string" },
+                        PageDisplayName: { type: "string" },
+                        PageUrl: { type: "string" },
+                        AccessDate: { type: "date" },
+                        LastAccessTime: { type: "string" },
+                        TotalCountOfDay: { type: "number" }
+                    }
+                }
+            },
+            group: {
+                field: "PageDisplayName",
+                aggregates: [
+                    { field: "TotalCountOfDay", aggregate: "sum" }
+                ]
+            },
+            aggregate: [
+                { field: "TotalCountOfDay", aggregate: "sum" }
+            ],
+            pageSize: 10
+        },
+        groupHeaderTemplate: function (data) {
+            return `Page: ${data.value} (Total Count: ${data.aggregates.TotalCountOfDay.sum})`;
+        },
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        scrollable: true,
+        toolbar: ["excel", "pdf"],
+        excel: {
+            fileName: "PageUsageData.xlsx",
+            filterable: true
+        },
+        pdf: {
+            fileName: "PageUsageData.pdf",
+            allPages: true,
+            paperSize: "A4",
+            landscape: true
+        },
+        columns: [
+            { field: "UserName", title: "User Name", width: "150px" },
+            { field: "PageDisplayName", title: "Page Name", width: "200px" },
+            { field: "PageUrl", title: "Page URL", width: "250px" },
+            { field: "TotalCountOfDay", title: "Total Count", width: "100px", aggregates: ["sum"] },
+            { field: "AccessDate", title: "Access Date", format: "{0:yyyy-MM-dd}", width: "150px" },
+            { field: "LastAccessTime", title: "Access Time", width: "150px" }
+        ]
+    });
+
+    // Apply Date Filters
+    $("#filterButton").on("click", function () {
+        var fromDate = $("#fromDate").val();
+        var toDate = $("#toDate").val();
+
+        if (fromDate && toDate) {
+            var grid = $("#adminGrid").data("kendoGrid");
+            grid.dataSource.filter({
+                logic: "and",
+                filters: [
+                    { field: "AccessDate", operator: "gte", value: new Date(fromDate) },
+                    { field: "AccessDate", operator: "lte", value: new Date(toDate) }
+                ]
+            });
+        } else {
+            alert("Please select both From Date and To Date.");
+        }
+    });
+
+    // Clear Filters
+    $("#clearFilter").on("click", function () {
+        var grid = $("#adminGrid").data("kendoGrid");
+        grid.dataSource.filter([]);
+        $("#fromDate").val("");
+        $("#toDate").val("");
+    });
+
+    // Export to Excel
+    $("#exportExcel").on("click", function () {
+        var grid = $("#adminGrid").data("kendoGrid");
+        grid.saveAsExcel();
+    });
+
+    // Export to PDF
+    $("#exportPdf").on("click", function () {
+        var grid = $("#adminGrid").data("kendoGrid");
+        grid.saveAsPDF();
+    });
+});
+
+---------------------------------------------------
+
+.grid-container {
+    max-width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.toolbar label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.toolbar input {
+    padding: 5px;
+    margin-right: 15px;
+}
+
+.toolbar .btn-filter,
+.toolbar .btn-clear,
+.toolbar .btn-export {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.toolbar .btn-filter:hover,
+.toolbar .btn-clear:hover,
+.toolbar .btn-export:hover {
+    background-color: #0056b3;
+}
+--------------------------------------------
