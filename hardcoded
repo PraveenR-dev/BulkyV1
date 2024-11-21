@@ -1,0 +1,49 @@
+$(document).ready(function () {
+    $("#adminGrid").kendoGrid({
+        dataSource: {
+            data: [
+                {
+                    PageName: "Current Page",
+                    Username: "Praveen",
+                    LastAccessDate: "2024-11-18",
+                    LastAccessTime: "03:25",
+                    PageUrl: "http://example.com/activity",
+                    Count: 6
+                },
+                {
+                    PageName: "Oakford",
+                    Username: "Shetty",
+                    LastAccessDate: "2024-11-19",
+                    LastAccessTime: "02:15",
+                    PageUrl: "http://example.com/oakford",
+                    Count: 3
+                }
+            ],
+            schema: {
+                model: {
+                    fields: {
+                        PageName: { type: "string" },
+                        Username: { type: "string" },
+                        LastAccessDate: { type: "string" },
+                        LastAccessTime: { type: "string" },
+                        PageUrl: { type: "string" },
+                        Count: { type: "number" }
+                    }
+                }
+            },
+            pageSize: 5
+        },
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        scrollable: true,
+        columns: [
+            { field: "PageName", title: "Page Name", width: "200px" },
+            { field: "Username", title: "Username", width: "150px" },
+            { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+            { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+            { field: "PageUrl", title: "Page URL", width: "250px" },
+            { field: "Count", title: "Count", width: "100px" }
+        ]
+    });
+});
