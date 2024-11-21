@@ -1,0 +1,299 @@
+$("#mainGrid").kendoGrid({
+    dataSource: {
+        data: data, // Replace with your hardcoded or API data
+        schema: {
+            model: {
+                fields: {
+                    PageName: { type: "string" },
+                    Username: { type: "string" },
+                    LastAccessDate: { type: "string" },
+                    LastAccessTime: { type: "string" },
+                    PageUrl: { type: "string" },
+                    Count: { type: "number" }
+                }
+            }
+        },
+        pageSize: 10
+    },
+    pageable: true,
+    sortable: true,
+    filterable: true,
+    columns: [
+        { field: "PageName", title: "Page Name", width: "150px" },
+        { field: "Username", title: "Username", width: "150px" },
+        { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+        { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+        { field: "PageUrl", title: "Page URL", width: "250px" },
+        { field: "Count", title: "Count", width: "100px" }
+    ]
+});
+
+-------------------------
+
+public class PageUsageController : Controller
+{
+    public ActionResult Index()
+    {
+        // Hardcoded data
+        var data = new List<PageUsage>
+        {
+            new PageUsage
+            {
+                PageName = "Current Page",
+                Username = "Praveen",
+                LastAccessDate = "17/11/2024",
+                LastAccessTime = "03:15",
+                PageUrl = "http://currentpage/activity",
+                Count = 2
+            },
+            new PageUsage
+            {
+                PageName = "Current Page",
+                Username = "Praveen",
+                LastAccessDate = "10/11/2024",
+                LastAccessTime = "02:15",
+                PageUrl = "http://currentpage/activity",
+                Count = 2
+            },
+            new PageUsage
+            {
+                PageName = "Current Page",
+                Username = "Shetty",
+                LastAccessDate = "10/18/2024",
+                LastAccessTime = "02:15",
+                PageUrl = "http://currentpage/measurement",
+                Count = 1
+            },
+            new PageUsage
+            {
+                PageName = "Oakford",
+                Username = "Praveen",
+                LastAccessDate = "11/18/2024",
+                LastAccessTime = "03:20",
+                PageUrl = "http://oakford/report",
+                Count = 5
+            },
+            new PageUsage
+            {
+                PageName = "Oakford",
+                Username = "Praveen",
+                LastAccessDate = "11/19/2024",
+                LastAccessTime = "04:30",
+                PageUrl = "http://oakford/report",
+                Count = 3
+            }
+        };
+
+        // Using LINQ to group and process data if needed
+        var groupedData = data.GroupBy(x => x.PageName)
+                              .Select(g => new PageUsageGroup
+                              {
+                                  PageName = g.Key,
+                                  TotalCount = g.Sum(x => x.Count),
+                                  UserDetails = g.Select(x => new PageUsageDetail
+                                  {
+                                      Username = x.Username,
+                                      LastAccessDate = x.LastAccessDate,
+                                      LastAccessTime = x.LastAccessTime,
+                                      PageUrl = x.PageUrl,
+                                      Count = x.Count
+                                  }).ToList()
+                              }).ToList();
+
+        // Passing data to view
+        return View(groupedData);
+    }
+}
+
+public class PageUsage
+{
+    public string PageName { get; set; }
+    public string Username { get; set; }
+    public string LastAccessDate { get; set; }
+    public string LastAccessTime { get; set; }
+    public string PageUrl { get; set; }
+    public int Count { get; set; }
+}
+
+public class PageUsageGroup
+{
+    public string PageName { get; set; }
+    public int TotalCount { get; set; }
+    public List<PageUsageDetail> UserDetails { get; set; }
+}
+
+public class PageUsageDetail
+{
+    public string Username { get; set; }
+    public string LastAccessDate { get; set; }
+    public string LastAccessTime { get; set; }
+    public string PageUrl { get; set; }
+    public int Count { get; set; }
+}
+------------------------------------
+
+<script>
+    $(document).ready(function () {
+        $("#mainGrid").kendoGrid({
+            dataSource: {
+                data: @Html.Raw(Json.Encode(Model)),
+                schema: {
+                    model: {
+                        fields: {
+                            PageName: { type: "string" },
+                            Username: { type: "string" },
+                            LastAccessDate: { type: "string" },
+                            LastAccessTime: { type: "string" },
+                            PageUrl: { type: "string" },
+                            Count: { type: "number" }
+                        }
+                    }
+                },
+                pageSize: 10
+            },
+            pageable: true,
+            sortable: true,
+            filterable: true,
+            columns: [
+                { field: "PageName", title: "Page Name", width: "150px" },
+                { field: "Username", title: "Username", width: "150px" },
+                { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+                { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                { field: "PageUrl", title: "Page URL", width: "250px" },
+                { field: "Count", title: "Count", width: "100px" }
+            ]
+        });
+    });
+</script>
+
+<div id="mainGrid"></div>
+-------------------------------------------
+
+<div id="mainGrid"></div>
+
+<script>
+    $(document).ready(function () {
+        $("#mainGrid").kendoGrid({
+            dataSource: {
+                data: [
+                    {
+                        PageName: "Current Page",
+                        TotalCount: 6,
+                        Users: [
+                            {
+                                Username: "Praveen",
+                                TotalCount: 4,
+                                Details: [
+                                    {
+                                        LastAccessDate: "17/11/2024",
+                                        LastAccessTime: "03:15",
+                                        URL: "http://currentpage/activity",
+                                        Count: 2
+                                    },
+                                    {
+                                        LastAccessDate: "10/11/2024",
+                                        LastAccessTime: "02:15",
+                                        URL: "http://currentpage/activity",
+                                        Count: 2
+                                    }
+                                ]
+                            },
+                            {
+                                Username: "Shetty",
+                                TotalCount: 2,
+                                Details: [
+                                    {
+                                        LastAccessDate: "18/10/2024",
+                                        LastAccessTime: "02:15",
+                                        URL: "http://currentpage/measurement",
+                                        Count: 1
+                                    },
+                                    {
+                                        LastAccessDate: "19/10/2024",
+                                        LastAccessTime: "03:15",
+                                        URL: "http://currentpage/measurement",
+                                        Count: 1
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        PageName: "Oakford",
+                        TotalCount: 8,
+                        Users: [
+                            {
+                                Username: "Praveen",
+                                TotalCount: 8,
+                                Details: [
+                                    {
+                                        LastAccessDate: "18/11/2024",
+                                        LastAccessTime: "03:20",
+                                        URL: "http://oakford/report",
+                                        Count: 5
+                                    },
+                                    {
+                                        LastAccessDate: "19/11/2024",
+                                        LastAccessTime: "04:30",
+                                        URL: "http://oakford/report",
+                                        Count: 3
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            pageable: false,
+            sortable: true,
+            columns: [
+                { field: "PageName", title: "Page Name", width: "200px" },
+                { field: "TotalCount", title: "Count", width: "100px" }
+            ],
+            detailTemplate: kendo.template($("#page-users-template").html()),
+            detailInit: function (e) {
+                $("<div/>").appendTo(e.detailCell).kendoGrid({
+                    dataSource: {
+                        data: e.data.Users
+                    },
+                    pageable: false,
+                    sortable: true,
+                    columns: [
+                        { field: "Username", title: "Username", width: "200px" },
+                        { field: "TotalCount", title: "Count", width: "100px" }
+                    ],
+                    detailTemplate: kendo.template($("#user-details-template").html()),
+                    detailInit: function (e) {
+                        $("<div/>").appendTo(e.detailCell).kendoGrid({
+                            dataSource: {
+                                data: e.data.Details
+                            },
+                            pageable: false,
+                            sortable: true,
+                            columns: [
+                                { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+                                { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                                { field: "URL", title: "URL", width: "250px" },
+                                { field: "Count", title: "Count", width: "100px" }
+                            ]
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<script type="text/x-kendo-template" id="page-users-template">
+    <div>
+        <h5>Users for #: PageName #</h5>
+        <div></div>
+    </div>
+</script>
+
+<script type="text/x-kendo-template" id="user-details-template">
+    <div>
+        <h5>Details for #: Username #</h5>
+        <div></div>
+    </div>
+</script>
