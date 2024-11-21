@@ -1,0 +1,120 @@
+<div id="grid"></div>
+
+<script>
+    $(document).ready(function () {
+        $("#grid").kendoGrid({
+            dataSource: {
+                data: [
+                    // Sample Data
+                    { PageName: "Current Page", Username: "Praveen", LastAccessDate: "17/11/2024", LastAccessTime: "03:15", URL: "http://currentpage/activity", Count: 2 },
+                    { PageName: "Current Page", Username: "Praveen", LastAccessDate: "10/11/2024", LastAccessTime: "02:15", URL: "http://currentpage/activity", Count: 2 },
+                    { PageName: "Current Page", Username: "Shetty", LastAccessDate: "18/10/2024", LastAccessTime: "02:15", URL: "http://currentpage/measurement", Count: 1 },
+                    { PageName: "Current Page", Username: "Shetty", LastAccessDate: "19/10/2024", LastAccessTime: "03:15", URL: "http://currentpage/measurement", Count: 1 },
+                    { PageName: "Oakford", Username: "Praveen", LastAccessDate: "18/11/2024", LastAccessTime: "03:20", URL: "http://oakford/report", Count: 5 },
+                    { PageName: "Oakford", Username: "Praveen", LastAccessDate: "19/11/2024", LastAccessTime: "04:30", URL: "http://oakford/report", Count: 3 }
+                ],
+                schema: {
+                    model: {
+                        fields: {
+                            PageName: { type: "string" },
+                            Username: { type: "string" },
+                            LastAccessDate: { type: "string" },
+                            LastAccessTime: { type: "string" },
+                            URL: { type: "string" },
+                            Count: { type: "number" }
+                        }
+                    }
+                },
+                group: [{ field: "PageName" }], // Group by Page Name initially
+                aggregate: [{ field: "Count", aggregate: "sum" }]
+            },
+            pageable: false,
+            sortable: true,
+            scrollable: true,
+            height: 600,
+            detailTemplate: kendo.template($("#detail-template").html()),
+            detailInit: function (e) {
+                $("<div/>").appendTo(e.detailCell).kendoGrid({
+                    dataSource: {
+                        data: e.data,
+                        group: [{ field: "Username" }] // Group by Username in child grid
+                    },
+                    pageable: false,
+                    sortable: true,
+                    detailTemplate: kendo.template($("#sub-detail-template").html()),
+                    detailInit: function (subE) {
+                        $("<div/>").appendTo(subE.detailCell).kendoGrid({
+                            dataSource: {
+                                data: [
+                                    {
+                                        LastAccessDate: subE.data.LastAccessDate,
+                                        LastAccessTime: subE.data.LastAccessTime,
+                                        URL: subE.data.URL,
+                                        Count: subE.data.Count,
+                                    },
+                                ],
+                            },
+                            columns: [
+                                { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+                                { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                                { field: "URL", title: "URL", width: "250px" },
+                                { field: "Count", title: "Count", width: "100px" },
+                            ],
+                        });
+                    },
+                    columns: [
+                        { field: "Username", title: "Username", width: "150px", groupable: false },
+                        { field: "Count", title: "Count", width: "100px", groupable: false },
+                    ],
+                });
+            },
+            columns: [
+                { field: "PageName", title: "Page Name", width: "200px", groupable: false },
+                { field: "Count", title: "Total Count", width: "100px", groupable: false }
+            ]
+        });
+    });
+</script>
+
+<!-- Detail Template for Parent Grid -->
+<script type="text/x-kendo-template" id="detail-template">
+    <div>
+        <h5>Details for #: PageName #</h5>
+        <div></div> <!-- Child Grid will be rendered here -->
+    </div>
+</script>
+
+<!-- Sub-Detail Template for Child Grid -->
+<script type="text/x-kendo-template" id="sub-detail-template">
+    <div>
+        <h5>User Details for #: Username #</h5>
+        <div></div> <!-- Sub-child Grid will be rendered here -->
+    </div>
+</script>
+
+
+--------------------------------------------------
+
+#grid {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.k-grid-header {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.k-detail-row {
+    background-color: #f9f9f9;
+}
+
+.k-grouping-row {
+    background-color: #e9ecef;
+    font-size: 15px;
+}
+
+h5 {
+    font-weight: bold;
+    margin: 10px 0;
+}
