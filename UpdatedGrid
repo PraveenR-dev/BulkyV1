@@ -1,0 +1,201 @@
+public class UserMenuUsageDetailsController : Controller
+{
+    // Action to fetch main grid data
+    public JsonResult GetMainGridData()
+    {
+        var data = new List<MenuUsage>
+        {
+            new MenuUsage
+            {
+                PageName = "Current Page",
+                Username = "Praveen",
+                PageUrl = "http://example.com/page1",
+                LastAccessDate = DateTime.Parse("2024-11-18"),
+                LastAccessTime = "03:25 PM",
+                Count = 2
+            },
+            new MenuUsage
+            {
+                PageName = "Current Page",
+                Username = "Praveen",
+                PageUrl = "http://example.com/page2",
+                LastAccessDate = DateTime.Parse("2024-11-19"),
+                LastAccessTime = "02:30 PM",
+                Count = 2
+            },
+            new MenuUsage
+            {
+                PageName = "Current Page",
+                Username = "Shetty",
+                PageUrl = "http://example.com/page3",
+                LastAccessDate = DateTime.Parse("2024-11-18"),
+                LastAccessTime = "03:25 PM",
+                Count = 1
+            },
+            new MenuUsage
+            {
+                PageName = "Oakford",
+                Username = "Praveen",
+                PageUrl = "http://example.com/page4",
+                LastAccessDate = DateTime.Parse("2024-11-18"),
+                LastAccessTime = "03:20 PM",
+                Count = 3
+            },
+            new MenuUsage
+            {
+                PageName = "Oakford",
+                Username = "Praveen",
+                PageUrl = "http://example.com/page5",
+                LastAccessDate = DateTime.Parse("2024-11-19"),
+                LastAccessTime = "02:30 PM",
+                Count = 3
+            }
+        };
+
+        return Json(data, JsonRequestBehavior.AllowGet);
+    }
+}
+
+----------------------------------------------------------------
+
+<div class="grid-container">
+    <!-- Toolbar for Export and Filter -->
+    <div class="toolbar">
+        <button id="exportExcel" class="k-button k-primary">Export to Excel</button>
+        <button id="exportPdf" class="k-button k-primary">Export to PDF</button>
+        <label for="fromDate">From:</label>
+        <input id="fromDate" style="width: 150px;" />
+        <label for="toDate">To:</label>
+        <input id="toDate" style="width: 150px;" />
+        <button id="applyFilter" class="k-button k-primary">Filter</button>
+    </div>
+
+    <!-- Main Grid -->
+    <div id="adminGrid"></div>
+</div>
+
+-----------------------------------------------------------------
+
+$(document).ready(function () {
+    // Initialize DatePickers
+    $("#fromDate").kendoDatePicker({ format: "yyyy-MM-dd" });
+    $("#toDate").kendoDatePicker({ format: "yyyy-MM-dd" });
+
+    // Toolbar Buttons
+    $("#exportExcel").click(function () {
+        $("#adminGrid").data("kendoGrid").saveAsExcel();
+    });
+
+    $("#exportPdf").click(function () {
+        $("#adminGrid").data("kendoGrid").saveAsPDF();
+    });
+
+    $("#applyFilter").click(function () {
+        var fromDate = $("#fromDate").val();
+        var toDate = $("#toDate").val();
+        var grid = $("#adminGrid").data("kendoGrid");
+        grid.dataSource.filter({
+            logic: "and",
+            filters: [
+                { field: "LastAccessDate", operator: "gte", value: fromDate },
+                { field: "LastAccessDate", operator: "lte", value: toDate }
+            ]
+        });
+    });
+
+    // Main Grid
+    $("#adminGrid").kendoGrid({
+        dataSource: {
+            transport: {
+                read: {
+                    url: "/UserMenuUsageDetails/GetMainGridData",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        PageName: { type: "string" },
+                        Username: { type: "string" },
+                        PageUrl: { type: "string" },
+                        LastAccessDate: { type: "date" },
+                        LastAccessTime: { type: "string" },
+                        Count: { type: "number" }
+                    }
+                }
+            },
+            pageSize: 10,
+            group: [
+                { field: "PageName" },
+                { field: "Username" }
+            ],
+            aggregate: [
+                { field: "Count", aggregate: "sum" }
+            ]
+        },
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        excel: {
+            fileName: "PageUsage.xlsx",
+            allPages: true
+        },
+        pdf: {
+            fileName: "PageUsage.pdf",
+            allPages: true,
+            avoidLinks: true
+        },
+        columns: [
+            { field: "PageName", title: "Page Name", hidden: true },
+            { field: "Username", title: "Username", hidden: true },
+            { field: "PageUrl", title: "Page URL", width: "250px" },
+            { field: "LastAccessDate", title: "Last Access Date", format: "{0:yyyy-MM-dd}", width: "150px" },
+            { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+            { field: "Count", title: "Daily Count", width: "100px", aggregates: ["sum"], groupFooterTemplate: "Total: #=sum#" }
+        ],
+        groupHeaderTemplate: function (data) {
+            if (data.field === "PageName") {
+                return `Page Name: ${data.value}`;
+            } else if (data.field === "Username") {
+                return `Username: ${data.value}`;
+            }
+        }
+    });
+});
+
+----------------------------------------------
+
+.grid-container {
+    max-width: 95%;
+    margin: 20px auto;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.toolbar {
+    margin-bottom: 15px;
+}
+
+.k-grid-header {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.k-grouping-row {
+    background-color: #e0e0e0;
+    padding: 10px;
+    font-size: 16px;
+}
+----------------------------------
+
+public class MenuUsage
+{
+    public string PageName { get; set; }
+    public string Username { get; set; }
+    public string PageUrl { get; set; }
+    public DateTime LastAccessDate { get; set; }
+    public string LastAccessTime { get; set; }
+    public int Count { get; set; }
+}
