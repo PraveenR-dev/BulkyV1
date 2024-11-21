@@ -1,0 +1,162 @@
+var nestedData = dbContext.AccessLogs // Assuming AccessLogs is your DbSet for the table
+    .GroupBy(log => log.PageName) // Group by PageName
+    .Select(pageGroup => new PageModel
+    {
+        PageName = pageGroup.Key,
+        TotalCount = pageGroup.Sum(log => log.Count),
+        Users = pageGroup
+            .GroupBy(log => log.Username) // Group users under each PageName
+            .Select(userGroup => new UserModel
+            {
+                Username = userGroup.Key,
+                TotalCount = userGroup.Sum(log => log.Count),
+                Details = userGroup
+                    .Select(detail => new DetailModel
+                    {
+                        LastAccessDate = detail.LastAccessDate.ToString("dd/MM/yyyy"),
+                        LastAccessTime = detail.LastAccessTime.ToString("HH:mm"),
+                        URL = detail.PageUrl,
+                        Count = detail.Count
+                    }).ToList()
+            }).ToList()
+    }).ToList();
+
+--------------------------------------------------
+public ActionResult GetNestedGridData()
+{
+    var nestedData = dbContext.AccessLogs
+        .GroupBy(log => log.PageName)
+        .Select(pageGroup => new PageModel
+        {
+            PageName = pageGroup.Key,
+            TotalCount = pageGroup.Sum(log => log.Count),
+            Users = pageGroup
+                .GroupBy(log => log.Username)
+                .Select(userGroup => new UserModel
+                {
+                    Username = userGroup.Key,
+                    TotalCount = userGroup.Sum(log => log.Count),
+                    Details = userGroup
+                        .Select(detail => new DetailModel
+                        {
+                            LastAccessDate = detail.LastAccessDate.ToString("dd/MM/yyyy"),
+                            LastAccessTime = detail.LastAccessTime.ToString("HH:mm"),
+                            URL = detail.PageUrl,
+                            Count = detail.Count
+                        }).ToList()
+                }).ToList()
+        }).ToList();
+
+    return Json(nestedData, JsonRequestBehavior.AllowGet); // Return JSON data
+}
+---------------------------------------------------
+
+@model IEnumerable<PageModel>
+<div id="mainGrid"></div>
+
+<script>
+    $(document).ready(function () {
+        $("#mainGrid").kendoGrid({
+            dataSource: {
+                data: @Html.Raw(Json.Encode(Model)), // Bind data from the backend
+                schema: {
+                    model: {
+                        fields: {
+                            PageName: { type: "string" },
+                            TotalCount: { type: "number" }
+                        }
+                    }
+                }
+            },
+            pageable: false,
+            sortable: true,
+            columns: [
+                { field: "PageName", title: "Page Name", width: "200px" },
+                { field: "TotalCount", title: "Count", width: "100px" }
+            ],
+            detailTemplate: kendo.template($("#page-users-template").html()),
+            detailInit: function (e) {
+                $("<div/>").appendTo(e.detailCell).kendoGrid({
+                    dataSource: {
+                        data: e.data.Users // Bind nested users
+                    },
+                    pageable: false,
+                    sortable: true,
+                    columns: [
+                        { field: "Username", title: "Username", width: "200px" },
+                        { field: "TotalCount", title: "Count", width: "100px" }
+                    ],
+                    detailTemplate: kendo.template($("#user-details-template").html()),
+                    detailInit: function (e) {
+                        $("<div/>").appendTo(e.detailCell).kendoGrid({
+                            dataSource: {
+                                data: e.data.Details // Bind nested details
+                            },
+                            pageable: false,
+                            sortable: true,
+                            columns: [
+                                { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+                                { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                                { field: "URL", title: "URL", width: "250px" },
+                                { field: "Count", title: "Count", width: "100px" }
+                            ]
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<script type="text/x-kendo-template" id="page-users-template">
+    <div>
+        <h5>Users for #: PageName #</h5>
+        <div></div>
+    </div>
+</script>
+
+<script type="text/x-kendo-template" id="user-details-template">
+    <div>
+        <h5>Details for #: Username #</h5>
+        <div></div>
+    </div>
+</script>
+------------------------
+public class DetailModel
+{
+    public string LastAccessDate { get; set; }
+    public string LastAccessTime { get; set; }
+    public string URL { get; set; }
+    public int Count { get; set; }
+}
+
+public class UserModel
+{
+    public string Username { get; set; }
+    public int TotalCount { get; set; }
+    public List<DetailModel> Details { get; set; }
+}
+
+public class PageModel
+{
+    public string PageName { get; set; }
+    public int TotalCount { get; set; }
+    public List<UserModel> Users { get; set; }
+}
+-----------------------------
+dataSource: {
+    transport: {
+        read: {
+            url: "/Controller/GetNestedGridData", // API endpoint
+            dataType: "json"
+        }
+    },
+    schema: {
+        model: {
+            fields: {
+                PageName: { type: "string" },
+                TotalCount: { type: "number" }
+            }
+        }
+    }
+}
