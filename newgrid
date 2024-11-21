@@ -1,0 +1,52 @@
+$(document).ready(function () {
+    $("#adminGrid").kendoGrid({
+        dataSource: {
+            transport: {
+                read: {
+                    url: "/UserMenuUsageDetails/GetMainGridData", // API for main grid data
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        PageName: { type: "string" },
+                        Username: { type: "string" },
+                        LastAccessDate: { type: "string" },
+                        LastAccessTime: { type: "string" },
+                        PageUrl: { type: "string" },
+                        Count: { type: "number" }
+                    }
+                }
+            },
+            group: [
+                { field: "PageName", aggregates: ["sum"] }, // First-level grouping by PageName
+                { field: "Username" } // Second-level grouping by Username
+            ],
+            aggregate: [
+                { field: "Count", aggregate: "sum" }
+            ],
+            pageSize: 10
+        },
+        pageable: true,
+        sortable: true,
+        filterable: true,
+        scrollable: true,
+        height: 600,
+        columns: [
+            { field: "PageName", title: "Page Name", hidden: true },
+            { field: "Username", title: "Username", hidden: true },
+            { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+            { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+            { field: "PageUrl", title: "URL", width: "250px" },
+            { field: "Count", title: "Count", width: "100px", aggregates: ["sum"], footerTemplate: "Total: #=sum#" }
+        ],
+        groupHeaderTemplate: function (data) {
+            if (data.field === "PageName") {
+                return `Page: ${data.value} (Total Count: ${data.aggregates.Count.sum})`;
+            } else if (data.field === "Username") {
+                return `User: ${data.value}`;
+            }
+        }
+    });
+});
