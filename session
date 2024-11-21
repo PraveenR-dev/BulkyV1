@@ -1,0 +1,83 @@
+server
+protected void Application_BeginRequest(object sender, EventArgs e)
+{
+    var sessionActive = HttpContext.Current.Request.Cookies["sessionActive"]?.Value;
+
+    if (string.IsNullOrEmpty(sessionActive))
+    {
+        // Call API to clear cache
+        using (var client = new HttpClient())
+        {
+            var result = client.PostAsync("https://localhost:44306/api/UserMenuItems/ClearCache", null).Result;
+            if (result.IsSuccessStatusCode)
+            {
+                // Set the cookie after clearing the cache
+                HttpContext.Current.Response.Cookies.Add(new HttpCookie("sessionActive", "true"));
+            }
+        }
+    }
+}
+
+// Set sessionActive in a cookie instead of sessionStorage
+document.cookie = "sessionActive=true; path=/;";
+
+
+-------------------------------------------
+Ajax
+document.addEventListener("DOMContentLoaded", function () {
+    const sessionActive = sessionStorage.getItem("sessionActive");
+
+    if (!sessionActive) {
+        console.log("Session not active. Clearing cache...");
+        fetch("https://localhost:44306/api/UserMenuItems/ClearCache", {
+            method: "POST"
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Cache cleared.");
+                sessionStorage.setItem("sessionActive", "true");
+                // Optionally reload or update the page content
+                window.location.reload();
+            } else {
+                console.error("Failed to clear cache.");
+            }
+        })
+        .catch(error => {
+            console.error("Error clearing cache:", error);
+        });
+    } else {
+        console.log("Session already active.");
+    }
+});
+----------------------------------------------------------------
+
+<script>
+    // Check sessionStorage and redirect after validation
+    window.onload = function () {
+        const sessionActive = sessionStorage.getItem("sessionActive");
+
+        if (!sessionActive) {
+            console.log("Session not active. Clearing cache...");
+            sessionStorage.setItem("sessionActive", "true");
+
+            // Call API to clear cache
+            fetch("https://localhost:44306/api/UserMenuItems/ClearCache", {
+                method: "POST"
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Cache cleared. Redirecting to HomeController...");
+                    window.location.href = "/home"; // Redirect to HomeController
+                } else {
+                    console.error("Failed to clear cache.");
+                }
+            })
+            .catch(error => {
+                console.error("Error clearing cache:", error);
+            });
+        } else {
+            console.log("Session already active. Redirecting to HomeController...");
+            window.location.href = "/home"; // Redirect to HomeController directly
+        }
+    };
+</script>
