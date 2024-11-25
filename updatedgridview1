@@ -1,0 +1,201 @@
+<div id="grid-container">
+    <div class="toolbar">
+        <button id="exportToExcel" class="k-button k-button-md k-button-flat k-button-primary">Export to Excel</button>
+        <button id="exportToPDF" class="k-button k-button-md k-button-flat k-button-primary">Export to PDF</button>
+    </div>
+
+    <div class="filter-section">
+        <label for="fromDate">From Date:</label>
+        <input id="fromDate" />
+        <label for="toDate">To Date:</label>
+        <input id="toDate" />
+        <button id="applyFilter" class="k-button k-button-md k-button-flat k-button-primary">Apply Filter</button>
+        <button id="clearFilter" class="k-button k-button-md k-button-flat">Clear Filter</button>
+    </div>
+
+    <div id="grid"></div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const today = new Date();
+
+        // Initialize From Date picker
+        $("#fromDate").kendoDatePicker({
+            value: today,
+            disableDates: function (date) {
+                const toDatePicker = $("#toDate").data("kendoDatePicker");
+                const toDate = toDatePicker ? toDatePicker.value() : null;
+
+                if (date > today) return true; // Disable future dates
+                if (toDate && date > toDate) return true; // Disable dates after To Date
+                return false;
+            },
+            change: function () {
+                const fromDate = this.value();
+                const toDatePicker = $("#toDate").data("kendoDatePicker");
+                if (toDatePicker) {
+                    toDatePicker.enable(true);
+                    toDatePicker.trigger("change");
+                }
+            },
+        });
+
+        // Initialize To Date picker
+        $("#toDate").kendoDatePicker({
+            value: today,
+            disableDates: function (date) {
+                const fromDatePicker = $("#fromDate").data("kendoDatePicker");
+                const fromDate = fromDatePicker ? fromDatePicker.value() : null;
+
+                if (date > today) return true; // Disable future dates
+                if (fromDate && date < fromDate) return true; // Disable dates before From Date
+                return false;
+            },
+            change: function () {
+                const toDate = this.value();
+                const fromDatePicker = $("#fromDate").data("kendoDatePicker");
+                if (fromDatePicker) {
+                    fromDatePicker.enable(true);
+                    fromDatePicker.trigger("change");
+                }
+            },
+        });
+
+        // Fetch data and render grid
+        $.ajax({
+            url: '@Url.Action("GetGridData", "YourControllerName")',
+            type: 'GET',
+            success: function (data) {
+                renderGrid(data);
+            },
+            error: function () {
+                alert("Failed to load data.");
+            }
+        });
+
+        function renderGrid(data) {
+            $("#grid").kendoGrid({
+                dataSource: {
+                    data: data,
+                    schema: {
+                        model: {
+                            fields: {
+                                PageName: { type: "string" },
+                                TotalCount: { type: "number" },
+                                Users: { type: "array" },
+                            },
+                        },
+                    },
+                },
+                columns: [
+                    {
+                        field: "PageName",
+                        title: "Page Name",
+                        width: "200px",
+                        template: function (dataItem) {
+                            return `
+                                <span class="expand-collapse-icon" data-action="expand" data-page="${dataItem.PageName}">+</span>
+                                ${dataItem.PageName}
+                            `;
+                        },
+                    },
+                    { field: "Username", title: "Username", width: "200px" },
+                    { field: "PageUrl", title: "Page URL", width: "300px" },
+                    { field: "AccessDate", title: "Access Date", width: "150px" },
+                    { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                    { field: "Count", title: "Count", width: "100px", attributes: { class: "text-right" } },
+                ],
+                dataBound: function () {
+                    const grid = this;
+
+                    grid.tbody.on("click", ".expand-collapse-icon[data-page]", function () {
+                        const $icon = $(this);
+                        const action = $icon.data("action");
+                        const pageName = $icon.data("page");
+
+                        const row = $icon.closest("tr");
+                        const dataItem = grid.dataItem(row);
+
+                        if (action === "expand") {
+                            $icon.text("-").data("action", "collapse");
+                            renderNestedRows(row, dataItem.Users || []);
+                        } else {
+                            $icon.text("+").data("action", "expand");
+                            row.nextAll(".nested-row").remove();
+                        }
+                    });
+                },
+                sortable: true,
+                pageable: true,
+                toolbar: ["search"],
+            });
+        }
+
+        function renderNestedRows(parentRow, users) {
+            users.forEach((user) => {
+                const usernameRow = `
+                    <tr class="nested-row">
+                        <td></td>
+                        <td>
+                            <span class="expand-collapse-icon" data-action="expand" data-username="${user.Username}">+</span>
+                            ${user.Username}
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="text-right">${user.TotalCount}</td>
+                    </tr>`;
+                parentRow.after(usernameRow);
+
+                user.Details.forEach((detail) => {
+                    const detailRow = `
+                        <tr class="nested-row" data-username="${user.Username}" style="display: none;">
+                            <td></td>
+                            <td></td>
+                            <td class="page-url-cell" title="${detail.PageUrl}">${detail.PageUrl}</td>
+                            <td>${detail.AccessDate}</td>
+                            <td>${detail.LastAccessTime}</td>
+                            <td class="text-right">${detail.Count}</td>
+                        </tr>`;
+                    parentRow.next().after(detailRow);
+                });
+            });
+        }
+
+        // Export to Excel
+        $("#exportToExcel").click(function () {
+            $("#grid").data("kendoGrid").saveAsExcel();
+        });
+
+        // Export to PDF
+        $("#exportToPDF").click(function () {
+            $("#grid").data("kendoGrid").saveAsPDF();
+        });
+
+        // Apply Filter
+        $("#applyFilter").click(function () {
+            const fromDate = $("#fromDate").data("kendoDatePicker").value();
+            const toDate = $("#toDate").data("kendoDatePicker").value();
+
+            if (fromDate && toDate) {
+                $("#grid").data("kendoGrid").dataSource.filter({
+                    logic: "and",
+                    filters: [
+                        { field: "AccessDate", operator: "gte", value: fromDate },
+                        { field: "AccessDate", operator: "lte", value: toDate },
+                    ],
+                });
+            } else {
+                alert("Please select both From Date and To Date.");
+            }
+        });
+
+        // Clear Filter
+        $("#clearFilter").click(function () {
+            $("#fromDate").data("kendoDatePicker").value(null);
+            $("#toDate").data("kendoDatePicker").value(null);
+                 $("#grid").data("kendoGrid").dataSource.filter([]);
+        });
+    });
+</script>
