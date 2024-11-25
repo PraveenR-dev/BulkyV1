@@ -1,0 +1,140 @@
+public ActionResult GetGridData()
+{
+    // Example LINQ query to fetch and structure data
+    var data = dbContext.UserMenuUsage // Your table name
+        .GroupBy(x => x.PageName)
+        .Select(pageGroup => new PageModel
+        {
+            PageName = pageGroup.Key,
+            TotalCount = pageGroup.Sum(x => x.TotalCount),
+            Users = pageGroup.GroupBy(x => x.Username)
+                .Select(userGroup => new UserModel
+                {
+                    Username = userGroup.Key,
+                    TotalCount = userGroup.Sum(x => x.TotalCount),
+                    Details = userGroup.Select(detail => new DetailModel
+                    {
+                        PageUrl = detail.PageUrl,
+                        AccessDate = detail.AccessDate.ToString("MM/dd/yyyy"),
+                        LastAccessTime = detail.LastAccessTime.ToString("HH:mm"),
+                        Count = detail.TotalCount
+                    }).ToList()
+                }).ToList()
+        }).ToList();
+
+    return Json(data, JsonRequestBehavior.AllowGet);
+}
+
+
+
+--------------------------------------------
+
+<div id="grid-container">
+    <div id="grid"></div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Fetch data from the server
+        $.ajax({
+            url: '@Url.Action("GetGridData", "YourControllerName")',
+            type: 'GET',
+            success: function (data) {
+                renderGrid(data);
+            },
+            error: function () {
+                alert("Failed to load data.");
+            }
+        });
+
+        function renderGrid(data) {
+            $("#grid").kendoGrid({
+                dataSource: {
+                    data: data,
+                    schema: {
+                        model: {
+                            fields: {
+                                PageName: { type: "string" },
+                                TotalCount: { type: "number" },
+                                Users: { type: "array" },
+                            },
+                        },
+                    },
+                },
+                columns: [
+                    {
+                        field: "PageName",
+                        title: "Page Name",
+                        width: "200px",
+                        template: function (dataItem) {
+                            return `
+                                <span class="expand-collapse-icon" data-action="expand" data-page="${dataItem.PageName}">+</span>
+                                ${dataItem.PageName}
+                            `;
+                        },
+                    },
+                    { field: "Username", title: "Username", width: "200px" },
+                    { field: "PageUrl", title: "Page URL", width: "300px" },
+                    { field: "AccessDate", title: "Access Date", width: "150px" },
+                    { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                    { field: "Count", title: "Count", width: "100px", attributes: { class: "text-right" } },
+                ],
+                dataBound: function () {
+                    const grid = this;
+
+                    // Expand/Collapse for Page Name
+                    grid.tbody.on("click", ".expand-collapse-icon[data-page]", function () {
+                        const $icon = $(this);
+                        const action = $icon.data("action");
+                        const pageName = $icon.data("page");
+
+                        const row = $icon.closest("tr");
+                        const dataItem = grid.dataItem(row);
+
+                        if (action === "expand") {
+                            $icon.text("-").data("action", "collapse");
+                            renderNestedRows(row, dataItem.Users || []);
+                        } else {
+                            $icon.text("+").data("action", "expand");
+                            row.nextAll(".nested-row").remove();
+                        }
+                    });
+                },
+                sortable: true,
+                pageable: true,
+                toolbar: ["search"],
+            });
+        }
+
+        function renderNestedRows(parentRow, users) {
+            users.forEach((user) => {
+                const usernameRow = `
+                    <tr class="nested-row">
+                        <td></td>
+                        <td>
+                            <span class="expand-collapse-icon" data-action="expand" data-username="${user.Username}">+</span>
+                            ${user.Username}
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="text-right">${user.TotalCount}</td>
+                    </tr>`;
+                parentRow.after(usernameRow);
+
+                user.Details.forEach((detail) => {
+                    const detailRow = `
+                        <tr class="nested-row" data-username="${user.Username}" style="display: none;">
+                            <td></td>
+                            <td></td>
+                            <td class="page-url-cell" title="${detail.PageUrl}">${detail.PageUrl}</td>
+                            <td>${detail.AccessDate}</td>
+                            <td>${detail.LastAccessTime}</td>
+                            <td class="text-right">${detail.Count}</td>
+                        </tr>`;
+                    parentRow.next().after(detailRow);
+                });
+            });
+        }
+    });
+</script>
