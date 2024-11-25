@@ -1,0 +1,31 @@
+     $(".expand-collapse-icon[data-username]").off("click").on("click", function () {
+            const $icon = $(this);
+            const action = $icon.data("action");
+            const username = $icon.data("username");
+
+            if (action === "expand") {
+                $icon.text("-").data("action", "collapse");
+                const userDetails = users.find((u) => u.Username === username).Details;
+                renderDetailRows($(this).closest("tr"), userDetails);
+            } else {
+                $icon.text("+").data("action", "expand");
+                $(this).closest("tr").nextAll(".detail-row").remove();
+            }
+        });
+
+-----------------------------------------------
+
+function renderDetailRows(usernameRow, details) {
+    details.forEach((detail) => {
+        const detailRow = `
+            <tr class="detail-row">
+                <td></td>
+                <td></td>
+                <td>${detail.PageUrl}</td>
+                <td>${detail.AccessDate}</td>
+                <td>${detail.LastAccessTime}</td>
+                <td class="text-right">${detail.Count}</td>
+            </tr>`;
+        usernameRow.after(detailRow);
+    });
+}
