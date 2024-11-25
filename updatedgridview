@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://kendo.cdn.telerik.com/2024.1.119/styles/kendo.material-v2.min.css" rel="stylesheet" />
+    <script src="https://kendo.cdn.telerik.com/2024.1.119/js/jquery.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2024.1.119/js/kendo.all.min.js"></script>
+    <style>
+        .k-grid-header th {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .expand-collapse-icon {
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 8px;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .nested-row {
+            background-color: #f9f9f9;
+        }
+
+        .toolbar {
+            margin-bottom: 20px;
+        }
+
+        .toolbar .k-button {
+            margin-right: 10px;
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .page-url-cell {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .page-url-cell:hover {
+            white-space: normal;
+            overflow: visible;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <button id="exportToExcel" class="k-button k-button-md k-button-flat k-button-primary">Export to Excel</button>
+        <button id="exportToPDF" class="k-button k-button-md k-button-flat k-button-primary">Export to PDF</button>
+    </div>
+
+    <div class="filter-section">
+        <label for="fromDate">From Date:</label>
+        <input id="fromDate" />
+        <label for="toDate">To Date:</label>
+        <input id="toDate" />
+        <button id="applyFilter" class="k-button k-button-md k-button-flat k-button-primary">Apply Filter</button>
+        <button id="clearFilter" class="k-button k-button-md k-button-flat">Clear Filter</button>
+    </div>
+
+    <div id="grid"></div>
+
+    <script>
+        $(document).ready(function () {
+            const today = new Date();
+            const data = [
+                {
+                    PageName: "Current Day",
+                    Count: 6,
+                    Users: [
+                        {
+                            Username: "Praveen",
+                            Count: 4,
+                            Details: [
+                                {
+                                    PageUrl: "/CurrentDay/Activity",
+                                    AccessDate: "11/25/2024",
+                                    LastAccessTime: "12:28",
+                                    Count: 2,
+                                },
+                                {
+                                    PageUrl: "/CurrentDay/Activity",
+                                    AccessDate: "11/24/2024",
+                                    LastAccessTime: "12:00",
+                                    Count: 2,
+                                },
+                            ],
+                        },
+                        {
+                            Username: "Sherry",
+                            Count: 2,
+                            Details: [
+                                {
+                                    PageUrl: "/CurrentDay/Activity/ExtendedURL",
+                                    AccessDate: "11/24/2024",
+                                    LastAccessTime: "12:00:00",
+                                    Count: 1,
+                                },
+                                {
+                                    PageUrl: "/CurrentDay/Activity",
+                                    AccessDate: "11/23/2024",
+                                    LastAccessTime: "12:00:00",
+                                    Count: 1,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ];
+
+            function renderNestedRows(parentRow, users) {
+                users.forEach((user) => {
+                    // Append the Username row with indicator
+                    const usernameRow = `
+                        <tr class="nested-row">
+                            <td></td>
+                            <td>
+                                <span class="expand-collapse-icon" data-action="expand" data-username="${user.Username}">+</span>
+                                ${user.Username}
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="text-right">${user.Count}</td>
+                        </tr>`;
+                    parentRow.after(usernameRow);
+
+                    // Append the Details rows (hidden initially)
+                    user.Details.forEach((detail) => {
+                        const detailRow = `
+                            <tr class="nested-row" data-username="${user.Username}" style="display: none;">
+                                <td></td>
+                                <td></td>
+                                <td class="page-url-cell" title="${detail.PageUrl}">${detail.PageUrl}</td>
+                                <td>${detail.AccessDate}</td>
+                                <td>${detail.LastAccessTime}</td>
+                                <td class="text-right">${detail.Count}</td>
+                            </tr>`;
+                        parentRow.next().after(detailRow);
+                    });
+                });
+            }
+
+            // Date pickers with validation
+            $("#fromDate").kendoDatePicker({
+                value: today,
+                disableDates: function (date) {
+                    const toDatePicker = $("#toDate").data("kendoDatePicker");
+                    const toDate = toDatePicker ? toDatePicker.value() : null;
+
+                    if (date > today) return true; // Disable future dates
+                    if (toDate && date > toDate) return true; // Disable dates after To Date
+                    return false;
+                },
+                change: function () {
+                    const fromDate = this.value();
+                    const toDatePicker = $("#toDate").data("kendoDatePicker");
+                    if (toDatePicker) {
+                        toDatePicker.enable(true);
+                        toDatePicker.trigger("change");
+                    }
+                },
+            });
+
+            $("#toDate").kendoDatePicker({
+                value: today,
+                disableDates: function (date) {
+                    const fromDatePicker = $("#fromDate").data("kendoDatePicker");
+                    const fromDate = fromDatePicker ? fromDatePicker.value() : null;
+
+                    if (date > today) return true; // Disable future dates
+                    if (fromDate && date < fromDate) return true; // Disable dates before From Date
+                    return false;
+                },
+                change: function () {
+                    const toDate = this.value();
+                    const fromDatePicker = $("#fromDate").data("kendoDatePicker");
+                    if (fromDatePicker) {
+                        fromDatePicker.enable(true);
+                        fromDatePicker.trigger("change");
+                    }
+                },
+            });
+
+            // Initialize Kendo Grid
+            const grid = $("#grid").kendoGrid({
+                dataSource: {
+                    data: data,
+                    schema: {
+                        model: {
+                            fields: {
+                                PageName: { type: "string" },
+                                Count: { type: "number" },
+                                Users: { type: "array" },
+                            },
+                        },
+                    },
+                },
+                columns: [
+                    {
+                        field: "PageName",
+                        title: "Page Name",
+                        width: "200px",
+                        template: function (dataItem) {
+                            return `
+                                <span class="expand-collapse-icon" data-action="expand" data-page="${dataItem.PageName}">+</span>
+                                ${dataItem.PageName}
+                            `;
+                        },
+                    },
+                    { field: "Username", title: "Username", width: "200px" },
+                    { field: "PageUrl", title: "Page URL", width: "300px" },
+                    { field: "AccessDate", title: "Access Date", width: "150px" },
+                    { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                    { field: "Count", title: "Count", width: "100px", attributes: { class: "text-right" } },
+                ],
+                dataBound: function () {
+                    const grid = this;
+
+                    // Expand/Collapse for Page Name
+                    grid.tbody.on("click", ".expand-collapse-icon[data-page]", function () {
+                        const $icon = $(this);
+                        const action = $icon.data("action");
+                        const pageName = $icon.data("page");
+
+                        const row = $icon.closest("tr");
+                        const dataItem = grid.dataItem(row);
+
+                        if (action === "expand") {
+                            $icon.text("-").data("action", "collapse");
+                            renderNestedRows(row, dataItem.Users || []);
+                        } else {
+                            $icon.text("+").data("action", "expand");
+                            row.nextAll(".nested-row").remove();
+                        }
+                    });
+
+                    // Expand/Collapse for Username
+                    grid.tbody.on("click", ".expand-collapse-icon[data-username]", function (e) {
+                        e.stopPropagation();
+                        const $icon = $(this);
+                        const action = $icon.data("action");
+                        const username = $icon.data("username");
+
+                        if (action === "expand") {
+                            $icon.text("-").data("action", "collapse");
+                            $(`tr[data-username="${username}"]`).show();
+                        } else {
+                            $icon.text("+").data("action", "expand");
+                            $(`tr[data-username="${username}"]`).hide();
+                        }
+                    });
+                },
+                sortable: true,
+                pageable: true,
+                            toolbar: ["search"], // Add search toolbar
+            });
+
+            // Apply Filter
+            $("#applyFilter").click(function () {
+                const fromDate = $("#fromDate").data("kendoDatePicker").value();
+                const toDate = $("#toDate").data("kendoDatePicker").value();
+
+                if (fromDate && toDate) {
+                    grid.dataSource.filter({
+                        logic: "and",
+                        filters: [
+                            { field: "AccessDate", operator: "gte", value: fromDate },
+                            { field: "AccessDate", operator: "lte", value: toDate },
+                        ],
+                    });
+                } else {
+                    alert("Please select both From Date and To Date.");
+                }
+            });
+
+            // Clear Filter
+            $("#clearFilter").click(function () {
+                $("#fromDate").data("kendoDatePicker").value(null);
+                $("#toDate").data("kendoDatePicker").value(null);
+                grid.dataSource.filter([]);
+            });
+
+            // Export to Excel
+            $("#exportToExcel").click(function () {
+                grid.saveAsExcel();
+            });
+
+            // Export to PDF
+            $("#exportToPDF").click(function () {
+                grid.saveAsPDF();
+            });
+        });
+    </script>
+</body>
+</html>
