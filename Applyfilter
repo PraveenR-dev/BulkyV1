@@ -1,0 +1,34 @@
+ // Call controller method manually
+        $.ajax({
+            url: "/YourController/GetMenuUsageData",
+            type: "GET",
+            data: {
+                fromDate: fromDate ? kendo.toString(fromDate, "yyyy-MM-dd") : null,
+                toDate: toDate ? kendo.toString(toDate, "yyyy-MM-dd") : null
+            },
+            success: function (data) {
+                // Rebind data to the grid
+                const grid = $("#grid").data("kendoGrid");
+                grid.dataSource.data(data); // Bind the new data to the grid
+            },
+            error: function (err) {
+                alert("Failed to load data. Please try again.");
+            }
+        });
+
+
+------------------------------------
+
+clear filter method
+   // Reload all data by calling the controller without filters
+        $.ajax({
+            url: "/YourController/GetMenuUsageData",
+            type: "GET",
+            success: function (data) {
+                const grid = $("#grid").data("kendoGrid");
+                grid.dataSource.data(data); // Bind the full dataset
+            },
+            error: function (err) {
+                alert("Failed to load data. Please try again.");
+            }
+        });
