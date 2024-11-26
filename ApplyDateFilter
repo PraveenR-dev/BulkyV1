@@ -1,0 +1,56 @@
+ // Apply Filter Button
+    $("#applyFilter").click(function () {
+        const fromDate = fromDatePicker.value();
+        const toDate = toDatePicker.value();
+
+        if (!fromDate || !toDate) {
+            alert("Please select valid From Date and To Date.");
+            return;
+        }
+
+        const grid = $("#grid").data("kendoGrid");
+        const originalData = grid.dataSource.data(); // Get original hierarchical data
+
+        // Filter the data recursively
+        const filteredData = filterNestedData(originalData, fromDate, toDate);
+
+        // Update the grid with the filtered data
+        grid.dataSource.data(filteredData);
+    });
+
+--------------------------------------
+
+// Recursive function to filter nested data
+    function filterNestedData(data, fromDate, toDate) {
+        const filtered = [];
+
+        data.forEach((page) => {
+            // Filter Users and their Details based on AccessDate
+            const filteredUsers = page.Users.map((user) => {
+                const filteredDetails = user.Details.filter((detail) => {
+                    const accessDate = new Date(detail.AccessDate);
+                    return accessDate >= fromDate && accessDate <= toDate;
+                });
+
+                // Include user only if their details match the filter
+                if (filteredDetails.length > 0) {
+                    return {
+                        ...user,
+                        Details: filteredDetails
+                    };
+                }
+
+                return null;
+            }).filter((user) => user !== null);
+
+            // Include page only if it has filtered users
+            if (filteredUsers.length > 0) {
+                filtered.push({
+                    ...page,
+                    Users: filteredUsers
+                });
+            }
+        });
+
+        return filtered;
+    }
