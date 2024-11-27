@@ -1,0 +1,23 @@
+ toolbar: [
+        {
+            name: "excel",
+            text: "Export to Excel" // Customize button text
+        },
+        {
+            name: "pdf",
+            text: "Export to PDF" // Customize button text
+        }
+    ],
+    excel: {
+        fileName: "GridExport.xlsx",
+        filterable: true // Includes only filtered data in the export
+    },
+    pdf: {
+        fileName: "GridExport.pdf",
+        allPages: true, // Exports all pages
+        paperSize: "A4",
+        margin: "1cm",
+        landscape: true,
+        repeatHeaders: true, // Repeats headers on each page
+        scale: 0.8 // Adjust scale for content fit
+    },
