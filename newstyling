@@ -1,0 +1,135 @@
+/* General Container */
+#grid-container {
+    margin: 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+/* Toolbar Styling */
+.toolbar {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+}
+
+.toolbar button {
+    margin-right: 10px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #353535;
+    color: var(--kendo-color-primary-onsurface, inherit);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.toolbar button:hover {
+    background-color: var(--bs-highlight-bg-inherit);
+}
+
+.toolbar button:active {
+    background-color: var(--bs-highlight-bg-inherit);
+}
+
+/* Filter Section */
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-section label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.filter-section input {
+    padding: 8px;
+    font-size: 14px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Buttons in Filter Section */
+.filter-section button {
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #353535;
+    color: var(--kendo-color-primary-onsurface, inherit);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filter-section button:hover {
+    background-color: var(--bs-highlight-bg-inherit);
+}
+
+.filter-section button:active {
+    background-color: var(--bs-highlight-bg-inherit);
+}
+
+/* Grid Styling */
+.k-grid {
+    border: 1px solid #ddd;
+    font-size: 14px;
+    width: 100%;
+    max-height: 400px; /* Allows for a scrollable grid */
+    overflow-y: auto; /* Vertical scroll bar */
+    overflow-x: auto; /* Horizontal scroll bar for large content */
+}
+
+.k-grid-header {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    color: #333;
+    text-align: left;
+}
+
+.k-grid-content {
+    background-color: #fff;
+}
+
+.k-grid th {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    background-color: #353535;
+    color: var(--kendo-color-primary-onsurface, inherit);
+}
+
+.k-grid td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Scrollbar Styling */
+.k-grid-content::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.k-grid-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.k-grid-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.k-grid-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
