@@ -1,0 +1,64 @@
+{
+    field: "PageUrl",
+    title: "Page URL",
+    width: "300px",
+    attributes: {
+        class: "page-url",
+    },
+    template: function (dataItem) {
+        return dataItem.PageUrl
+            ? `<span class="page-url-cell"></span>` // Placeholder for dynamically added Page URL
+            : "";
+    },
+},
+
+
+---------------------------------
+
+$(".expand-collapse-icon[data-username]").off("click").on("click", function (e) {
+    e.preventDefault();
+    const $icon = $(this);
+    const username = $icon.data("username");
+    const pageName = $icon.closest("tr").data("page");
+    const action = $icon.data("action");
+
+    if (action === "expand") {
+        const pageDetails = pages.find(
+            (p) => p.PageName.trim().toLowerCase() === pageName.trim().toLowerCase()
+        );
+        const userDetails = pageDetails.Users.find(
+            (u) => u.Username.trim().toLowerCase() === username.trim().toLowerCase()
+        );
+
+        renderDetailRows($icon.closest("tr"), userDetails.Details);
+
+        // Add tooltips for dynamically added Page URLs
+        $icon.closest("tr").nextAll(".nested-row").find(".page-url-cell").each(function (index) {
+            const detailRow = userDetails.Details[index]; // Match the detail row index
+            if (detailRow.PageUrl) {
+                $(this)
+                    .text(detailRow.PageUrl) // Display the short version
+                    .attr("title", detailRow.PageUrl); // Tooltip for full URL
+            }
+        });
+
+        $icon.text("-").data("action", "collapse");
+    } else {
+        $icon.closest("tr").nextAll(".nested-row").remove();
+        $icon.text("+").data("action", "expand");
+    }
+});
+--------------------------------------------
+
+dataBound: function () {
+    const grid = this;
+
+    // Initialize tooltip for Page URL column
+    grid.tbody.find(".page-url-cell").each(function () {
+        const cell = $(this);
+        const pageUrl = cell.attr("title"); // Use the `title` attribute for tooltips
+        if (pageUrl) {
+            cell.attr("title", pageUrl); // Update title for dynamic tooltips
+        }
+    });
+}
