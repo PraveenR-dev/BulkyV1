@@ -1,0 +1,23 @@
+.k-grid-toolbar {
+    display: flex;
+    justify-content: flex-start; /* Aligns buttons to the left */
+    gap: 10px; /* Adds space between buttons */
+    margin-bottom: 10px; /* Adds spacing below the toolbar */
+}
+
+.k-grid-toolbar .k-grid-excel,
+.k-grid-toolbar .k-grid-pdf {
+    background-color: #353535; /* Button background color */
+    color: var(--kendo-color-primary-onsurface, #fff); /* Button text color */
+    border: none; /* Remove border */
+    padding: 8px 12px; /* Button padding */
+    font-size: 14px; /* Button font size */
+    cursor: pointer;
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s ease;
+}
+
+.k-grid-toolbar .k-grid-excel:hover,
+.k-grid-toolbar .k-grid-pdf:hover {
+    background-color: var(--bs-highlight-bg-inherit, #555); /* Hover background color */
+}
