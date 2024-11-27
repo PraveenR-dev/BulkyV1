@@ -1,0 +1,55 @@
+.export-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#exportToExcel,
+#exportToPDF {
+    background-color: #353535;
+    color: var(--kendo-color-primary-onsurface, #fff);
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#exportToExcel:hover,
+#exportToPDF:hover {
+    background-color: var(--bs-highlight-bg-inherit, #555);
+}
+
+
+--------------------------------------------
+
+toolbar: [
+        {
+            template: `
+                <div class="export-toolbar">
+                    <button id="exportToExcel" class="k-button k-button-md k-button-flat k-button-primary">Export to Excel</button>
+                    <button id="exportToPDF" class="k-button k-button-md k-button-flat k-button-primary">Export to PDF</button>
+                </div>
+            `
+        },
+        "search" // Adds the search box
+    ],
+    excel: {
+        fileName: "GridExport.xlsx",
+        filterable: true
+    },
+    pdf: {
+        fileName: "GridExport.pdf",
+        allPages: true
+    },
+-------------------------------------
+/ Event handlers for Export buttons
+$("#exportToExcel").click(function () {
+    const grid = $("#adminGrid").data("kendoGrid");
+    grid.saveAsExcel();
+});
+
+$("#exportToPDF").click(function () {
+    const grid = $("#adminGrid").data("kendoGrid");
+    grid.saveAsPDF();
+});
