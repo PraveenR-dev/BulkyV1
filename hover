@@ -1,0 +1,59 @@
+.page-url {
+    position: relative;
+}
+
+.page-url:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background-color: #333;
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 10;
+    font-size: 12px;
+}
+
+
+-------------------------------------
+
+$(".expand-collapse-icon[data-username]").off("click").on("click", function (e) {
+    e.preventDefault();
+    const $icon = $(this);
+    const action = $icon.data("action");
+    const parentRow = $icon.closest("tr");
+
+    if (action === "expand") {
+        $icon.text("-").data("action", "collapse");
+
+        // Fetch details dynamically (example function)
+        fetchDetailsForUser($icon.data("username")).then((detailsData) => {
+            if (detailsData) {
+                const nestedRow = `
+                    <tr class="nested-row">
+                        <td colspan="5">
+                            <table>
+                                <tr>
+                                    <td>Page URL</td>
+                                    <td>
+                                        <span class="page-url" 
+                                              title="${detailsData.PageUrl}" 
+                                              style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 100%;">
+                                            ${detailsData.PageUrl}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                `;
+                parentRow.after(nestedRow);
+            }
+        });
+    } else {
+        $icon.text("+").data("action", "expand");
+        parentRow.nextAll(".nested-row").remove(); // Collapse rows
+    }
+});
