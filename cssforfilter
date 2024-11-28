@@ -1,0 +1,26 @@
+/* Style for the input boxes */
+input#fromDate, input#toDate {
+    width: 150px; /* Adjust the width */
+    height: 30px; /* Adjust the height */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 14px; /* Adjust font size */
+    padding: 5px; /* Inner padding for better spacing */
+    border: 1px solid #ccc; /* Light border for better visibility */
+}
+
+/* Style for the Apply Filter and Clear Filter buttons */
+button#applyFilter, button#clearFilter {
+    background-color: #007BFF; /* Background color for buttons */
+    color: white; /* White text color */
+    border: none; /* Remove default border */
+    border-radius: 20px; /* Oval shape */
+    padding: 10px 20px; /* Adjust padding for size and spacing */
+    font-size: 14px; /* Font size of the button text */
+    cursor: pointer; /* Add pointer cursor */
+    margin-left: 10px; /* Space between buttons */
+}
+
+/* Add hover effect for buttons */
+button#applyFilter:hover, button#clearFilter:hover {
+    background-color: #0056b3; /* Slightly darker blue on hover */
+}
