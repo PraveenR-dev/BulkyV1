@@ -1,0 +1,101 @@
+$("#exportToPDF").click(function () {
+  const grid = $("#grid").data("kendoGrid");
+
+  // Custom PDF Export
+  grid.saveAsPDF({
+    allPages: true, // Export all data
+    paperSize: "A4",
+    landscape: true,
+    fileName: "GridExport.pdf",
+    margin: "1cm",
+    repeatHeaders: true, // Repeat headers on all pages
+    scale: 0.8,
+    template: `
+      <div class="pdf-header">
+        <h3>Exported Grid Data</h3>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Page Name</th>
+            <th>Username</th>
+            <th>Page URL</th>
+            <th>Access Date</th>
+            <th>Last Access Time</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${preparePDFData()}
+        </tbody>
+      </table>
+    `,
+  });
+});
+
+// Prepare hierarchical data for PDF
+function preparePDFData() {
+  const data = $("#grid").data("kendoGrid").dataSource.data(); // Fetch hierarchical data
+  let htmlRows = "";
+
+  data.forEach((page) => {
+    // Page Name Row
+    htmlRows += `
+      <tr>
+        <td colspan="6" style="font-weight:bold;">${page.PageName} (Page Count: ${page.PageCount || "N/A"})</td>
+      </tr>`;
+
+    // Username Rows
+    page.Users.forEach((user) => {
+      htmlRows += `
+        <tr>
+          <td></td>
+          <td colspan="5" style="padding-left:20px; font-style:italic;">
+            ${user.Username} (User Count: ${user.UserCount || "N/A"})
+          </td>
+        </tr>`;
+
+      // Detail Rows
+      user.Details.forEach((detail) => {
+        htmlRows += `
+          <tr>
+            <td></td>
+            <td></td>
+            <td style="padding-left:40px;">${detail.PageUrl}</td>
+            <td>${detail.AccessDate}</td>
+            <td>${detail.LastAccessTime}</td>
+            <td>${detail.Count}</td>
+          </tr>`;
+      });
+    });
+  });
+
+  return htmlRows;
+}
+
+------------------------------------------
+toolbar: [
+  { name: "pdf", text: "Export to PDF" },
+],
+
+-----------------------------------
+
+.pdf-header {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-size: 12px;
+}
+th {
+  background-color: #f4f4f4;
+}
+
