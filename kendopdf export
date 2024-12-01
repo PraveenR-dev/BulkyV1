@@ -1,0 +1,144 @@
+$("#exportToPDF").click(function () {
+  const grid = $("#grid").data("kendoGrid");
+
+  // Fetch hierarchical data
+  const hierarchicalData = getHierarchicalData();
+
+  // Custom PDF Export
+  kendo.drawing.drawDOM(
+    $("<div>").append(`
+      <div class="pdf-header" style="text-align: center; margin-bottom: 20px;">
+        <h3>Exported Grid Data</h3>
+      </div>
+      <table border="1" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding: 8px;">Page Name</th>
+            <th style="text-align: left; padding: 8px;">Username</th>
+            <th style="text-align: left; padding: 8px;">Page URL</th>
+            <th style="text-align: left; padding: 8px;">Access Date</th>
+            <th style="text-align: left; padding: 8px;">Last Access Time</th>
+            <th style="text-align: left; padding: 8px;">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${preparePDFData(hierarchicalData)}
+        </tbody>
+      </table>
+    `),
+    {
+      paperSize: "A4",
+      landscape: true,
+      margin: { left: "1cm", right: "1cm", top: "1cm", bottom: "1cm" },
+    }
+  ).then(function (group) {
+    kendo.drawing.pdf.saveAs(group, "GridExport.pdf");
+  });
+});
+
+// Prepare hierarchical data for PDF
+function preparePDFData(data) {
+  let htmlRows = "";
+
+  data.forEach((page) => {
+    // Page Name Row
+    htmlRows += `
+      <tr>
+        <td colspan="6" style="font-weight:bold; padding: 8px;">${page.PageName} (Page Count: ${page.PageCount || "N/A"})</td>
+      </tr>`;
+
+    // Username Rows
+    page.Users.forEach((user) => {
+      htmlRows += `
+        <tr>
+          <td></td>
+          <td colspan="5" style="padding-left:20px; font-style:italic; padding: 8px;">
+            ${user.Username} (User Count: ${user.UserCount || "N/A"})
+          </td>
+        </tr>`;
+
+      // Detail Rows
+      user.Details.forEach((detail) => {
+        htmlRows += `
+          <tr>
+            <td></td>
+            <td></td>
+            <td style="padding-left:40px; padding: 8px;">${detail.PageUrl}</td>
+            <td style="padding: 8px;">${detail.AccessDate}</td>
+            <td style="padding: 8px;">${detail.LastAccessTime}</td>
+            <td style="padding: 8px;">${detail.Count}</td>
+          </tr>`;
+      });
+    });
+  });
+
+  return htmlRows;
+}
+
+// Fetch hierarchical data from the grid
+function getHierarchicalData() {
+  const gridData = $("#grid").data("kendoGrid").dataSource.data();
+  const hierarchicalData = [];
+
+  gridData.forEach((page) => {
+    const users = page.Users.map((user) => ({
+      Username: user.Username,
+      UserCount: user.UserCount,
+      Details: user.Details,
+    }));
+
+    hierarchicalData.push({
+      PageName: page.PageName,
+      PageCount: page.PageCount,
+      Users: users,
+    });
+  });
+
+  return hierarchicalData;
+}
+------------------------------------
+
+extra
+
+$("#exportToPDF").click(function () {
+  const grid = $("#grid").data("kendoGrid");
+  const htmlRows = preparePDFData(); // Generate rows dynamically
+
+  // Wrap the rows in a table with headers
+  const customHTML = `
+    <div class="pdf-header" style="text-align: center; margin-bottom: 20px;">
+      <h3>Exported Grid Data</h3>
+    </div>
+    <table border="1" style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th style="padding: 8px; text-align: left;">Page Name</th>
+          <th style="padding: 8px; text-align: left;">Username</th>
+          <th style="padding: 8px; text-align: left;">Page URL</th>
+          <th style="padding: 8px; text-align: left;">Access Date</th>
+          <th style="padding: 8px; text-align: left;">Last Access Time</th>
+          <th style="padding: 8px; text-align: left;">Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${htmlRows}
+      </tbody>
+    </table>
+  `;
+
+  // Use kendo.drawing.drawDOM for custom PDF generation
+  kendo.drawing
+    .drawDOM($("<div>").append(customHTML), {
+      paperSize: "A4",
+      margin: { top: "1cm", bottom: "1cm", left: "1cm", right: "1cm" },
+      landscape: true,
+    })
+    .then(function (group) {
+      kendo.drawing.pdf.saveAs(group, "GridExport.pdf");
+    });
+});
+
+--------------------------------
+
+<td style="padding: 8px; text-align: left;">${detail.PageUrl}</td>
+
