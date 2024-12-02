@@ -1,0 +1,45 @@
+success: function (response) {
+    console.log("Server Response:", response);
+
+    // Clear grid data and existing rows
+    const grid = $("#adminGrid").data("kendoGrid");
+    console.log("Clearing existing data and rows...");
+    grid.dataSource.data([]);
+    $("#adminGrid tbody").find(".nested-row, .detail-row").remove();
+
+    // Bind new data to grid
+    console.log("Binding new data to grid...");
+    grid.dataSource.data(response);
+
+    // Check if data is bound correctly
+    console.log("Bound Data:", grid.dataSource.data());
+
+    // Reapply rendering logic for details rows
+    response.forEach((page) => {
+        console.log("Processing Page:", page.PageName);
+
+        // Get parent row for the page
+        const pageRow = $(`#adminGrid tbody tr[data-uid="${page.uid}"]`);
+        if (!pageRow.length) {
+            console.error("Page Row not found for:", page.PageName);
+        }
+
+        page.Users.forEach((user) => {
+            console.log("Adding User Row:", user.Username);
+
+            const userRow = `
+              <tr class="nested-row" data-username="${user.Username}">
+                <td></td>
+                <td>${user.Username}</td>
+                <td colspan="4"></td>
+              </tr>
+            `;
+            pageRow.after(userRow);
+
+            // Render details for the user
+            renderDetailRows($(userRow), user.Details);
+        });
+    });
+
+    grid.refresh(); // Ensure grid refreshes
+},
