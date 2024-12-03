@@ -1,0 +1,7 @@
+DateTime currentDate = DateTime.Now;
+DateTime threeMonthsAgo = currentDate.AddMonths(-3);
+
+var filteredData = await _dbContext.YourTable
+    .Where(x => x.AccessDate >= threeMonthsAgo && x.AccessDate <= currentDate)
+    .OrderByDescending(x => x.AccessDate)
+    .ToListAsync();
