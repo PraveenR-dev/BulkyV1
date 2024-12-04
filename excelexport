@@ -1,0 +1,12 @@
+template:
+        `<button id="customExportExcel" class="k-button k-button-icontext">
+          <span class="k-icon k-i-excel"></span> Export to Excel
+        </button>`,
+    },
+
+    ----------------------------------
+
+    $(document).on("click", "#customExportExcel", function () {
+  const grid = $("#adminGrid").data("kendoGrid");
+  grid.saveAsExcel();
+});
