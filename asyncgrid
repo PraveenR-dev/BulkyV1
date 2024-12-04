@@ -1,0 +1,10 @@
+workbook.toDataURLAsync().then(function (dataURI) {
+    kendo.saveAs({
+      dataURI: dataURI,
+      fileName: "UserMenuUsage.xlsx", // Correctly sets the filename
+    });
+  }).catch(function (error) {
+    console.error("Error generating the Excel file:", error);
+    alert("Failed to generate Excel file.");
+  });
+});
