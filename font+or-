@@ -1,0 +1,64 @@
+.expand-collapse-icon i {
+  cursor: pointer;
+  color: #333; /* Change to your preferred color */
+  font-size: 14px; /* Adjust size as needed */
+  margin-right: 8px; /* Add space between icon and text */
+}
+
+----------------------------
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+
+-------------------------------
+
+function renderNestedRows(pageName, parentRow, users) {
+  users.forEach((user) => {
+    const usernameRow = `
+      <tr class="nested-row" data-username="${user.Username}" data-page="${pageName}">
+        <td></td>
+        <td>
+          <span 
+            class="expand-collapse-icon" 
+            data-action="expand" 
+            data-username="${user.Username}"
+          >
+            <i class="fa fa-chevron-down"></i> <!-- Default Expand Icon -->
+          </span>
+          ${user.Username}
+        </td>
+        <td></td>
+        <td></td>
+        <td class="text-right">${user.TotalCount}</td>
+      </tr>`;
+    parentRow.after(usernameRow);
+  });
+
+  // Attach Click Events for Expand/Collapse
+  $(".expand-collapse-icon[data-username]")
+    .off("click")
+    .on("click", function (e) {
+      e.preventDefault();
+      const $icon = $(this);
+      const action = $icon.data("action");
+      const username = $icon.data("username").trim();
+      const pageName = $icon.closest("tr").data("page").trim();
+
+      if (action === "expand") {
+        // Expand logic
+        $(`.detail-row[data-username="${username}"]`).remove(); // Clear previous rows
+        $icon.html('<i class="fa fa-chevron-up"></i>'); // Change to Collapse Icon
+        $icon.data("action", "collapse");
+
+        // Fetch and render user details
+        const pageDetails = pages.find((p) => p.PageName === pageName);
+        const userDetails = pageDetails.Users.find((u) => u.Username === username);
+        renderDetailRows($icon.closest("tr"), userDetails.Details);
+      } else {
+        // Collapse logic
+        $(`.detail-row[data-username="${username}"]`).remove(); // Remove rows
+        $icon.html('<i class="fa fa-chevron-down"></i>'); // Change to Expand Icon
+        $icon.data("action", "expand");
+      }
+    });
+}
