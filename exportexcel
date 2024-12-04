@@ -1,0 +1,62 @@
+$("#exportToExcel").click(function () {
+  const grid = $("#adminGrid").data("kendoGrid");
+
+  // Prepare hierarchical data for Excel export
+  const hierarchicalData = getHierarchicalDataForExport();
+
+  // Log hierarchical data (for debugging)
+  console.log(hierarchicalData);
+
+  // Use Kendo's Excel export with hierarchical data
+  grid.saveAsExcel({
+    data: hierarchicalData,
+    fileName: "UserMenuUsage.xlsx",
+    filterable: true, // Export filtered data
+    allPages: true, // Include all pages
+  });
+});
+
+// Function to get hierarchical data for Excel export
+function getHierarchicalDataForExport() {
+  const data = $("#adminGrid").data("kendoGrid").dataSource.data(); // Root data
+  const exportData = [];
+
+  // Loop through each page-level row
+  data.forEach((page) => {
+    // Add parent (Page Name) row
+    exportData.push({
+      PageName: page.PageName,
+      Username: "", // Empty for the parent row
+      PageUrl: "",
+      AccessDate: "",
+      LastAccessTime: "",
+      Count: page.TotalCount || 0,
+    });
+
+    // Loop through child rows (Users)
+    page.Users.forEach((user) => {
+      exportData.push({
+        PageName: "", // Empty for the child row
+        Username: user.Username,
+        PageUrl: "",
+        AccessDate: "",
+        LastAccessTime: "",
+        Count: user.UserCount || 0,
+      });
+
+      // Loop through grandchild rows (Details)
+      user.Details.forEach((detail) => {
+        exportData.push({
+          PageName: "", // Empty for grandchild rows
+          Username: "",
+          PageUrl: detail.PageUrl,
+          AccessDate: detail.AccessDate,
+          LastAccessTime: detail.LastAccessTime,
+          Count: detail.Count,
+        });
+      });
+    });
+  });
+
+  return exportData;
+}
