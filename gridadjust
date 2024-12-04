@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Kendo Grid</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/kendo-ui-core/2023.3.1203/styles/kendo.common.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/kendo-ui-core/2023.3.1203/styles/kendo.default.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent unnecessary scrollbars */
+        }
+
+        .header, .filters {
+            padding: 10px;
+            background-color: #f7f7f7;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .grid-container {
+            height: calc(100vh - 100px); /* Adjust 100px for header/filters */
+            overflow: hidden;
+        }
+
+        .k-grid {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Responsive Kendo Grid</h2>
+    </div>
+    <div class="filters">
+        <input type="date" id="fromDate" placeholder="From Date">
+        <input type="date" id="toDate" placeholder="To Date">
+        <button id="applyFilter">Apply Filter</button>
+    </div>
+    <div class="grid-container">
+        <div id="adminGrid"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2023.3.1203/js/kendo.all.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize Kendo Grid
+            $("#adminGrid").kendoGrid({
+                dataSource: {
+                    data: generateDummyData(), // Generate sample data
+                    pageSize: 10
+                },
+                height: "100%",
+                sortable: true,
+                pageable: true,
+                columns: [
+                    { field: "PageName", title: "Page Name", width: 150 },
+                    { field: "Username", title: "Username", width: 150 },
+                    { field: "PageUrl", title: "Page URL", width: 300 },
+                    { field: "AccessDate", title: "Access Date", width: 150 },
+                    { field: "LastAccessTime", title: "Last Access Time", width: 150 },
+                    { field: "Count", title: "Count", width: 100 }
+                ]
+            });
+
+            // Adjust grid height on window resize
+            $(window).on("resize", function () {
+                var newHeight = $(window).height() - $(".header").outerHeight(true) - $(".filters").outerHeight(true);
+                $(".grid-container").height(newHeight);
+                $("#adminGrid").data("kendoGrid").resize();
+            }).trigger("resize");
+
+            // Example filter functionality
+            $("#applyFilter").click(function () {
+                alert("Filter applied!"); // Replace with real filtering logic
+            });
+        });
+
+        // Generate dummy data for the grid
+        function generateDummyData() {
+            return [
+                { PageName: "Page 1", Username: "User 1", PageUrl: "http://example.com", AccessDate: "2024-01-01", LastAccessTime: "10:00 AM", Count: 1 },
+                { PageName: "Page 2", Username: "User 2", PageUrl: "http://example.com", AccessDate: "2024-01-02", LastAccessTime: "11:00 AM", Count: 2 },
+                { PageName: "Page 3", Username: "User 3", PageUrl: "http://example.com", AccessDate: "2024-01-03", LastAccessTime: "12:00 PM", Count: 3 },
+            ];
+        }
+    </script>
+</body>
+</html>
