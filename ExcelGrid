@@ -1,0 +1,115 @@
+$("#exportToExcel").click(function () {
+  // Fetch hierarchical data
+  const hierarchicalData = getHierarchicalData();
+
+  // Prepare data for export
+  const excelRows = prepareExcelData(hierarchicalData);
+
+  // Export using Kendo's Excel export functionality
+  const workbook = new kendo.ooxml.Workbook({
+    sheets: [
+      {
+        columns: [
+          { autoWidth: true },
+          { autoWidth: true },
+          { autoWidth: true },
+          { autoWidth: true },
+          { autoWidth: true },
+          { autoWidth: true },
+        ],
+        title: "Exported Data",
+        rows: excelRows,
+      },
+    ],
+  });
+
+  // Save the Excel file
+  kendo.saveAs({
+    dataURI: workbook.toDataURL(),
+    fileName: "ExportedData.xlsx",
+  });
+});
+
+// Prepare hierarchical data for Excel
+function prepareExcelData(data) {
+  const rows = [];
+
+  // Add header row
+  rows.push({
+    cells: [
+      { value: "Page Name", background: "#f2f2f2", bold: true },
+      { value: "Username", background: "#f2f2f2", bold: true },
+      { value: "Page URL", background: "#f2f2f2", bold: true },
+      { value: "Access Date", background: "#f2f2f2", bold: true },
+      { value: "Last Access Time", background: "#f2f2f2", bold: true },
+      { value: "Count", background: "#f2f2f2", bold: true },
+    ],
+  });
+
+  // Add data rows
+  data.forEach((page) => {
+    // Add page row
+    rows.push({
+      cells: [
+        { value: `${page.PageName} (Page Count: ${page.PageCount || "N/A"})`, bold: true },
+        { value: "" },
+        { value: "" },
+        { value: "" },
+        { value: "" },
+        { value: "" },
+      ],
+    });
+
+    // Add user rows
+    page.Users.forEach((user) => {
+      rows.push({
+        cells: [
+          { value: "" },
+          { value: `${user.Username} (User Count: ${user.UserCount || "N/A"})`, italic: true },
+          { value: "" },
+          { value: "" },
+          { value: "" },
+          { value: "" },
+        ],
+      });
+
+      // Add detail rows
+      user.Details.forEach((detail) => {
+        rows.push({
+          cells: [
+            { value: "" },
+            { value: "" },
+            { value: detail.PageUrl },
+            { value: detail.AccessDate },
+            { value: detail.LastAccessTime },
+            { value: detail.Count },
+          ],
+        });
+      });
+    });
+  });
+
+  return rows;
+}
+
+// Fetch hierarchical data from the grid
+function getHierarchicalData() {
+  const gridData = $("#adminGrid").data("kendoGrid").dataSource.data();
+  const hierarchicalData = [];
+
+  gridData.forEach((page) => {
+    const users = page.Users.map((user) => ({
+      Username: user.Username,
+      UserCount: user.UserCount,
+      Details: user.Details,
+    }));
+
+    hierarchicalData.push({
+      PageName: page.PageName,
+      PageCount: page.PageCount,
+      Users: users,
+    });
+  });
+
+  return hierarchicalData;
+}
