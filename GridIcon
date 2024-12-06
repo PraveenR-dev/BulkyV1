@@ -1,0 +1,57 @@
+$("#grid").kendoGrid({
+    dataSource: {
+        data: data, // Your data source
+        schema: {
+            model: {
+                fields: {
+                    PageName: { type: "string" },
+                    Count: { type: "number" },
+                },
+            },
+        },
+    },
+    sortable: {
+        mode: "single", // Allows sorting by a single column at a time
+        allowUnsort: true, // Enables the option to clear sorting
+    },
+    columns: [
+        { field: "PageName", title: "Page Name", attributes: { class: "sortable-column" } },
+        { field: "Count", title: "Count", attributes: { class: "sortable-column" } },
+    ],
+});
+
+
+-------------------------------------------
+
+$(document).ready(function () {
+    const grid = $("#grid").data("kendoGrid");
+
+    // Add sorting icons manually to all sortable columns
+    grid.thead.find("th[data-field]").each(function () {
+        const header = $(this);
+        if (!header.hasClass("k-sorted")) {
+            header.append('<span class="k-icon k-i-sort-asc"></span>');
+        }
+    });
+});
+----------------------------
+
+/* Unsorted State */
+th.k-header .k-icon.k-i-sort-asc {
+    color: #f39c12; /* Yellow color */
+    opacity: 0.6; /* Slightly faded to indicate it's unsorted */
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+/* Sorted Ascending */
+th.k-header.k-sorted[aria-sort="ascending"] .k-icon.k-i-sort-asc {
+    color: #f39c12; /* Bright yellow */
+    opacity: 1; /* Fully visible */
+}
+
+/* Sorted Descending */
+th.k-header.k-sorted[aria-sort="descending"] .k-icon.k-i-sort-desc {
+    color: #f39c12; /* Bright yellow */
+    opacity: 1; /* Fully visible */
+}
