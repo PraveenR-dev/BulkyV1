@@ -1,0 +1,68 @@
+columns: [
+    {
+        field: "PageName",
+        title: "Page Name",
+        sortable: true,
+        width: "200px",
+        attributes: { class: "sortable-column" },
+        headerAttributes: { class: "sortable-header" }, // Add header attributes for styling
+        template: function (dataItem) {
+            return `
+                <span class="expand-collapse-icon" data-action="expand" data-page="${dataItem.PageName}">
+                    ${dataItem.PageName}
+                </span>`;
+        },
+    },
+    {
+        field: "Username",
+        title: "Username",
+        width: "200px",
+        sortable: false, // Disable sorting for this column
+    },
+    {
+        field: "TotalCount",
+        title: "Count",
+        sortable: true, // Enable sorting for the "Count" column
+        width: "100px",
+        headerAttributes: { class: "sortable-header" },
+    },
+],
+
+
+-------------------------------------------------
+
+/* Ensure sorting icons are always visible */
+.k-grid-header .k-header .k-link .k-icon {
+    visibility: visible !important;
+    color: yellow; /* Yellow color for icons */
+    font-size: 14px; /* Adjust size as necessary */
+}
+
+/* Style the sorted state */
+.k-header.k-sorted .k-icon {
+    color: yellow !important; /* Yellow when active */
+}
+
+/* Optional: Adjust column header styles */
+.sortable-header {
+    background-color: #f2f2f2; /* Light background for clarity */
+    font-weight: bold;
+}
+
+-----------------------------------------------------
+
+dataSource: {
+    data: yourData,
+    schema: {
+        model: {
+            fields: {
+                PageName: { type: "string" },
+                TotalCount: { type: "number" },
+                Users: { type: "array" },
+            },
+        },
+    },
+    sort: [
+        { field: "PageName", dir: "asc" }, // Default sorting for "Page Name"
+    ],
+},
