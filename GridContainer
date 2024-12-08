@@ -1,0 +1,40 @@
+<div id="main-container" style="display: flex; flex-direction: column; gap: 20px; padding: 10px;">
+    <!-- Filter Section -->
+    <div id="filter-section" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <label for="fromDate">From Date:</label>
+            <input id="fromDate" />
+            <label for="toDate">To Date:</label>
+            <input id="toDate" />
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button id="applyFilter" class="k-button k-button-md k-button-flat k-button-primary">Apply Filter</button>
+            <button id="clearFilter" class="k-button k-button-md k-button-flat">Clear Filter</button>
+        </div>
+    </div>
+
+    <!-- Grid Section -->
+    <div id="grid-container" style="flex: 1;">
+        <div id="adminGrid"></div>
+    </div>
+</div>
+-------------------------------
+
+#grid-container {
+    height: calc(100vh - 150px); /* Adjust grid height dynamically */
+}
+
+------------------------------------
+
+#filter-section {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#grid-container {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: auto;
+}
