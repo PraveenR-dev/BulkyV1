@@ -1,0 +1,67 @@
+.k-header[data-title="Page Name"] .k-sort-icon {
+    visibility: visible; /* Ensure the sort icon is always visible */
+    color: yellow; /* Apply your preferred color */
+    font-size: 14px; /* Adjust size */
+    margin-left: 5px; /* Add spacing */
+}
+
+
+----------------------------------------------
+
+/* Ensure the sorting icon is always visible */
+.k-header .k-sort-icon {
+    visibility: visible; /* Always visible */
+    color: yellow; /* Example color for the icon */
+}
+
+/* Adjust alignment and spacing */
+.k-header .k-sort-icon {
+    margin-left: 5px; /* Adjust spacing */
+    font-size: 12px; /* Adjust size */
+}
+
+------------------------------------------
+$("#grid").kendoGrid({
+    dataSource: {
+        data: myData, // Your data source
+        schema: {
+            model: {
+                fields: {
+                    PageName: { type: "string" },
+                    TotalCount: { type: "number" },
+                }
+            }
+        },
+        sort: [{ field: "PageName", dir: "asc" }] // Default sorting
+    },
+    sortable: true,
+    columns: [
+        {
+            field: "PageName",
+            title: "Page Name",
+            sortable: true,
+            headerTemplate: `
+                <span class="k-link">
+                    Page Name
+                    <span class="k-sort-icon k-i-sort-asc-small"></span>
+                </span>
+            `
+        },
+        {
+            field: "TotalCount",
+            title: "Count",
+            sortable: true,
+            headerTemplate: `
+                <span class="k-link">
+                    Count
+                    <span class="k-sort-icon k-i-sort-asc-small"></span>
+                </span>
+            `
+        },
+        {
+            field: "Username",
+            title: "Username",
+            sortable: false // No sorting icon here
+        }
+    ]
+});
