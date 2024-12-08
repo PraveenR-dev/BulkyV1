@@ -1,0 +1,64 @@
+<div class="container">
+    <div class="filter-section">
+        <label for="fromDate">From Date:</label>
+        <input id="fromDate" type="date">
+        <label for="toDate">To Date:</label>
+        <input id="toDate" type="date">
+        <button id="applyFilter" class="k-button">Apply Filter</button>
+        <button id="clearFilter" class="k-button">Clear Filter</button>
+    </div>
+    <div class="grid-container">
+        <div id="adminGrid" class="k-grid">
+            <!-- Your Kendo Grid content -->
+        </div>
+    </div>
+</div>
+------------------------------------
+
+<style>
+    .container {
+        display: flex;
+        flex-direction: column; /* Align filters on top, grid below */
+        height: 100vh; /* Take the full height of the viewport */
+    }
+
+    .filter-section {
+        display: flex;
+        align-items: center; /* Center items vertically */
+        justify-content: flex-start; /* Align items to the left */
+        padding: 10px;
+        background-color: #f8f9fa; /* Light background for the filter */
+        border-bottom: 1px solid #ddd; /* Add a separator line */
+    }
+
+    .filter-section label,
+    .filter-section input {
+        margin-right: 10px;
+    }
+
+    .filter-section button {
+        margin-left: 10px;
+    }
+
+    .grid-container {
+        flex: 1; /* Take up remaining space below filters */
+        overflow: auto; /* Add scrolling if content overflows */
+        padding: 10px;
+    }
+
+    .k-grid {
+        height: 100%; /* Ensure grid takes up available space */
+        width: 100%; /* Ensure grid spans the full width */
+    }
+</style>
+
+------------------------------------------
+
+$(window).on("resize", function () {
+    const containerHeight = $(".container").height();
+    const filterHeight = $(".filter-section").outerHeight();
+    const gridHeight = containerHeight - filterHeight;
+
+    $("#adminGrid").data("kendoGrid").resize();
+    $(".k-grid").height(gridHeight);
+}).trigger("resize");
