@@ -1,0 +1,36 @@
+const detailRow = `
+<tr class="detail-row" data-username="${usernameRow.data("username").trim()}" data-page="${usernameRow.data("page")}">
+    <td></td>
+    <td></td>
+    <td id="PageUrl">
+        <span class="page-url-hover" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 200px;">
+            ${detail.PageUrl}
+        </span>
+    </td>
+    <td>${detail.AccessDate}</td>
+    <td>${detail.LastAccessTime}</td>
+    <td class="text-right">${formattedDetailCount}</td>
+</tr>`;
+usernameRow.after(detailRow);
+
+--------------------------------------
+
+/* Default state: Truncated URL with ellipsis */
+#PageUrl .page-url-hover {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 200px; /* Adjust as needed */
+}
+
+/* On hover: Expand to show full URL */
+#PageUrl:hover .page-url-hover {
+    max-width: none; /* Remove width limit */
+    overflow: visible; /* Ensure all text is visible */
+    white-space: normal; /* Allow wrapping if necessary */
+    background-color: #f9f9f9; /* Optional: Add highlight for better visibility */
+    padding: 2px; /* Optional: Add padding for clarity */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Optional: Add shadow */
+}
+
