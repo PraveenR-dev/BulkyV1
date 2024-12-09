@@ -1,0 +1,32 @@
+/* Default truncation with ellipsis */
+td#PageUrl span {
+    display: inline-block;
+    max-width: 300px; /* Adjust as per your grid column width */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* On hover, expand to show the full URL */
+td#PageUrl:hover span {
+    max-width: none;
+    white-space: normal; /* Break into multiple lines if needed */
+    overflow: visible;
+    text-overflow: clip;
+    background-color: #f9f9f9; /* Optional: highlight the row */
+    z-index: 1; /* Ensure it is above other content */
+    padding: 5px; /* Add padding for better visibility */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: add a shadow for clarity */
+}
+
+--------------------------------------
+
+{
+    field: "PageUrl",
+    title: "Page URL",
+    width: "300px",
+    template: "<span title='#: PageUrl #' id='PageUrl'>#: PageUrl #</span>",
+    attributes: {
+        class: "text-ellipsis" // Optional: for consistent styling
+    }
+}
