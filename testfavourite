@@ -1,0 +1,209 @@
+using Xunit;
+using Moq;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+
+namespace RTBASecurityAPI.Tests.Controllers
+{
+    public class FavouriteControllerTests
+    {
+        private readonly FavouriteController _controller;
+        private readonly Mock<RTBA_Portal_2Entities> _mockDbContext;
+
+        public FavouriteControllerTests()
+        {
+            _mockDbContext = new Mock<RTBA_Portal_2Entities>();
+            _controller = new FavouriteController();
+
+            // Use reflection to replace the private _db field
+            var dbField = typeof(FavouriteController).GetField("_db", BindingFlags.NonPublic | BindingFlags.Instance);
+            dbField.SetValue(_controller, _mockDbContext.Object);
+        }
+
+        // ----------------------------------------
+        // Tests for GetFavourite
+        // ----------------------------------------
+
+        [Fact]
+        public async Task GetFavourite_ReturnsOk_WhenDataExists()
+        {
+            // Arrange
+            var userName = "testUser";
+            var mockBookmarks = new List<Bookmark>
+            {
+                new Bookmark { userName = userName, MenuItemKey = 101 }
+            }.AsQueryable();
+
+            _mockDbContext.Setup(db => db.bookmarks).ReturnsDbSet(mockBookmarks);
+
+            // Act
+            var result = await _controller.GetFavourite();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var returnedData = Assert.IsAssignableFrom<List<Bookmark>>(okResult.Value);
+            Assert.Single(returnedData);
+        }
+
+        [Fact]
+        public async Task GetFavourite_ReturnsBadRequest_WhenNoDataExists()
+        {
+            // Arrange
+            var mockBookmarks = new List<Bookmark>().AsQueryable();
+            _mockDbContext.Setup(db => db.bookmarks).ReturnsDbSet(mockBookmarks);
+
+            // Act
+            var result = await _controller.GetFavourite();
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetFavourite_ReturnsInternalServerError_OnException()
+        {
+            // Arrange
+            _mockDbContext.Setup(db => db.bookmarks).Throws(new System.Exception("Database error"));
+
+            // Act
+            var result = await _controller.GetFavourite();
+
+            // Assert
+            var objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, objectResult.StatusCode); // Internal Server Error
+        }
+
+        // ----------------------------------------
+        // Tests for AddFavourite
+        // ----------------------------------------
+
+        [Fact]
+        public async Task AddFavourite_ReturnsOk_WhenItemAdded()
+        {
+            // Arrange
+            int menuItemKey = 101;
+            var mockBookmarks = new List<Bookmark>().AsQueryable();
+            _mockDbContext.Setup(db => db.bookmarks).ReturnsDbSet(mockBookmarks);
+
+            // Act
+            var result = await _controller.AddFavourite(menuItemKey);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task AddFavourite_ReturnsBadRequest_WhenBookmarkExists()
+        {
+            // Arrange
+            int menuItemKey = 101;
+            var userName = "testUser";
+            var mockBookmarks = new List<Bookmark>
+            {
+                new Bookmark { userName = userName, MenuItemKey = menuItemKey }
+            }.AsQueryable();
+
+            _mockDbContext.Setup(db => db.bookmarks).ReturnsDbSet(mockBookmarks);
+
+            // Act
+            var result = await _controller.AddFavourite(menuItemKey);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        // ----------------------------------------
+        // Tests for DeleteFavourite
+        // ----------------------------------------
+
+        [Fact]
+        public async Task DeleteFavourite_ReturnsOk_WhenItemDeleted()
+        {
+            // Arrange
+            int menuItemKey = 101;
+            var mockBookmarks = new List<Bookmark>
+            {
+                new Bookmark { userName = "testUser", MenuItemKey = menuItemKey }
+            }.AsQueryable();
+
+            _mockDbContext.Setup(db => db.bookmarks).ReturnsDbSet(mockBookmarks);
+
+            // Act
+            var result = await _controller.DeleteFavourite(menuItemKey);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteFavourite_ReturnsBadRequest_WhenItemDoesNotExist()
+        {
+            // Arrange
+            int menuItemKey = 101;
+            var mockBookmarks = new List<Bookmark>().AsQueryable();
+            _mockDbContext.Setup(db => db.bookmarks).ReturnsDbSet(mockBookmarks);
+
+            // Act
+            var result = await _controller.DeleteFavourite(menuItemKey);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        // ----------------------------------------
+        // Tests for BookmarkExists
+        // ----------------------------------------
+
+        [Fact]
+        public void BookmarkExists_ReturnsTrue_WhenBookmarkExists()
+        {
+            // Arrange
+            var mockBookmarks = new List<Bookmark>
+            {
+                new Bookmark { userName = "testUser", MenuItemKey = 101 }
+            }.AsQueryable();
+
+            _mockDbContext.Setup(db => db.bookmarks).ReturnsDbSet(mockBookmarks);
+
+            // Act
+            var result = _controller.BookmarkExists("testUser", 101);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void BookmarkExists_ReturnsFalse_WhenBookmarkDoesNotExist()
+        {
+            // Arrange
+            var mockBookmarks = new List<Bookmark>().AsQueryable();
+            _mockDbContext.Setup(db => db.bookmarks).ReturnsDbSet(mockBookmarks);
+
+            // Act
+            var result = _controller.BookmarkExists("testUser", 101);
+
+            // Assert
+            Assert.False(result);
+        }
+    }
+
+    // ----------------------------------------
+    // Mocking DbSet Helper Extension
+    // ----------------------------------------
+
+    public static class DbSetMock
+    {
+        public static Mock<DbSet<T>> ReturnsDbSet<T>(this Mock<RTBA_Portal_2Entities> mock, IQueryable<T> data) where T : class
+        {
+            var dbSet = new Mock<DbSet<T>>();
+            dbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(data.Provider);
+            dbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(data.Expression);
+            dbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(data.ElementType);
+            dbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(data.GetEnumerator());
+            return dbSet;
+        }
+    }
+}
