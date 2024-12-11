@@ -1,0 +1,115 @@
+using System.Data.Entity;
+using System.Data.SQLite;
+
+public class TestDbContext : RTBA_Portal_2Entities
+{
+    public TestDbContext() : base(CreateInMemoryConnection(), true)
+    {
+    }
+
+    private static SQLiteConnection CreateInMemoryConnection()
+    {
+        var connection = new SQLiteConnection("Data Source=:memory:;Version=3;New=True;");
+        connection.Open(); // Keep the database alive during the test
+        return connection;
+    }
+
+    protected override void OnModelCreating(DbModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        // Configure any additional mappings if needed
+    }
+}
+------------------------------------
+
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web.Http;
+
+public class FavouriteController : ApiController
+{
+    private readonly RTBA_Portal_2Entities _db = new RTBA_Portal_2Entities(); // Direct initialization
+
+    [HttpGet]
+    public async Task<IHttpActionResult> GetFavourite()
+    {
+        string userName = "testUser"; // Replace with your actual user retrieval logic
+
+        var bookmarks = await _db.bookmarks.Where(b => b.userName == userName).ToListAsync();
+
+        if (!bookmarks.Any())
+            return BadRequest("No favourites found.");
+
+        return Ok(bookmarks);
+    }
+}
+------------------------------------------
+
+using Xunit;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+
+public class FavouriteControllerTests
+{
+    private readonly TestDbContext _context;
+
+    public FavouriteControllerTests()
+    {
+        // Step 1: Initialize SQLite In-Memory Database
+        _context = new TestDbContext();
+
+        // Step 2: Seed the Database with Test Data
+        SeedDatabase();
+    }
+
+    private void SeedDatabase()
+    {
+        // Add test data to the in-memory database
+        _context.bookmarks.Add(new Bookmark { userName = "testUser", MenuItemKey = 101 });
+        _context.bookmarks.Add(new Bookmark { userName = "anotherUser", MenuItemKey = 102 });
+        _context.SaveChanges();
+    }
+
+    [Fact]
+    public async Task GetFavourite_ReturnsOk_WhenDataExists()
+    {
+        // Step 3: Initialize Controller
+        var controller = new FavouriteController();
+
+        // Step 4: Use reflection to replace _db field with TestDbContext
+        var dbField = typeof(FavouriteController).GetField("_db", BindingFlags.NonPublic | BindingFlags.Instance);
+        dbField.SetValue(controller, _context);
+
+        // Act
+        var result = await controller.GetFavourite();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returnedData = Assert.IsAssignableFrom<List<Bookmark>>(okResult.Value);
+        Assert.Single(returnedData);
+        Assert.Equal(101, returnedData[0].MenuItemKey);
+    }
+
+    [Fact]
+    public async Task GetFavourite_ReturnsBadRequest_WhenNoDataExists()
+    {
+        // Step 1: Clear Test Data
+        _context.bookmarks.RemoveRange(_context.bookmarks);
+        _context.SaveChanges();
+
+        // Step 2: Initialize Controller
+        var controller = new FavouriteController();
+
+        // Step 3: Use reflection to replace _db field with TestDbContext
+        var dbField = typeof(FavouriteController).GetField("_db", BindingFlags.NonPublic | BindingFlags.Instance);
+        dbField.SetValue(controller, _context);
+
+        // Act
+        var result = await controller.GetFavourite();
+
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+}
