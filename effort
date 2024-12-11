@@ -1,0 +1,81 @@
+using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
+using System.Collections.Generic;
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
+
+public class FavouriteControllerTests
+{
+    private readonly RTBA_Portal_2Entities _context;
+
+    public FavouriteControllerTests()
+    {
+        // Step 1: Create a transient in-memory database using Effort
+        _context = Effort.ObjectContextFactory.CreateTransient<RTBA_Portal_2Entities>();
+
+        // Step 2: Seed the in-memory database with test data
+        SeedDatabase();
+    }
+
+    private void SeedDatabase()
+    {
+        // Add test data to the in-memory database
+        _context.bookmarks.Add(new Bookmark { userName = "testUser", MenuItemKey = 101 });
+        _context.bookmarks.Add(new Bookmark { userName = "anotherUser", MenuItemKey = 102 });
+        _context.SaveChanges();
+    }
+
+    [Fact]
+    public async Task GetFavourite_ReturnsOk_WhenDataExists()
+    {
+        // Step 3: Initialize the controller
+        var controller = new FavouriteController();
+
+        // Step 4: Inject the in-memory DbContext (_context) into the controller using reflection
+        var dbField = typeof(FavouriteController).GetField("_db", BindingFlags.NonPublic | BindingFlags.Instance);
+        dbField.SetValue(controller, _context);
+
+        // Step 5: Act - Call the method
+        var result = await controller.GetFavourite();
+
+        // Step 6: Assert - Validate the results
+        Assert.NotNull(result);
+        Assert.IsType<OkObjectResult>(result);
+        var okResult = result as OkObjectResult;
+        var data = Assert.IsAssignableFrom<List<Bookmark>>(okResult.Value);
+        Assert.Single(data);
+        Assert.Equal(101, data.First().MenuItemKey);
+    }
+
+    [Fact]
+    public async Task GetFavourite_ReturnsBadRequest_WhenNoDataExists()
+    {
+        // Step 1: Clear the test data
+        _context.bookmarks.RemoveRange(_context.bookmarks);
+        _context.SaveChanges();
+
+        // Step 2: Initialize the controller
+        var controller = new FavouriteController();
+
+        // Step 3: Inject the in-memory DbContext (_context) into the controller using reflection
+        var dbField = typeof(FavouriteController).GetField("_db", BindingFlags.NonPublic | BindingFlags.Instance);
+        dbField.SetValue(controller, _context);
+
+        // Step 4: Act - Call the method
+        var result = await controller.GetFavourite();
+
+        // Step 5: Assert - Validate the results
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+}
+---------------------
+
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <connectionStrings>
+    <add name="DefaultConnection"
+         connectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TestDatabase;Integrated Security=True"
+         providerName="System.Data.SqlClient" />
+  </connectionStrings>
+</configuration>
