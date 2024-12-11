@@ -1,0 +1,26 @@
+<connectionStrings>
+  <add name="RTBA_Portal_2Entities"
+       connectionString="metadata=res://*/DBContext.Model1.csdl|res://*/DBContext.Model1.ssdl|res://*/DBContext.Model1.msl;
+                         provider=System.Data.SqlClient;
+                         provider connection string='Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TestDatabase;Integrated Security=True;MultipleActiveResultSets=True;Application Name=EntityFramework;Version=3;'"
+       providerName="System.Data.EntityClient" />
+</connectionStrings>
+
+
+------------------
+
+<connectionStrings>
+  <add name="RTBA_Portal_2Entities"
+       connectionString="Data Source=:memory:;Version=3;New=True;"
+       providerName="System.Data.SQLite" />
+</connectionStrings>
+
+------------------
+
+<connectionStrings>
+  <add name="RTBA_Portal_2Entities"
+       connectionString="metadata=res://*/DBContext.Model1.csdl|res://*/DBContext.Model1.ssdl|res://*/DBContext.Model1.msl;
+                         provider=Effort.Provider.EffortProvider;
+                         provider connection string='Data Source=EffortDb;Version=1;New=True;'"
+       providerName="System.Data.EntityClient" />
+</connectionStrings>
