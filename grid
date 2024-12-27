@@ -1,0 +1,91 @@
+$("#grid").kendoGrid({
+    dataSource: {
+        data: [
+            { PageName: "Home", Count: 120 },
+            { PageName: "About", Count: 80 },
+            { PageName: "Contact", Count: 50 },
+            { PageName: "Blog", Count: 200 }
+        ],
+        schema: {
+            model: {
+                fields: {
+                    PageName: { type: "string" },
+                    Count: { type: "number" }
+                }
+            }
+        },
+        pageSize: 5
+    },
+    toolbar: [
+        {
+            template: `
+                <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+                    <button class="k-button k-button-icontext k-grid-excel export-button" title="Export to Excel">
+                        <span class="k-icon k-i-file-excel"></span>Export to Excel
+                    </button>
+                    <button class="k-button k-button-icontext k-grid-pdf export-button" title="Export to PDF" style="margin-left: 10px;">
+                        <span class="k-icon k-i-file-pdf"></span>Export to PDF
+                    </button>
+                    <div class="search-container" style="margin-left: 15px; position: relative;">
+                        <input type="text" id="customSearchBox" class="k-textbox" 
+                               placeholder="Search..." style="padding-left: 30px; width: 200px;" />
+                        <span class="k-icon k-i-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"></span>
+                    </div>
+                </div>`
+        }
+    ],
+    pageable: true,
+    sortable: true,
+    columns: [
+        { field: "PageName", title: "Page Name", width: "150px" },
+        { field: "Count", title: "Views", width: "100px" }
+    ],
+    excel: {
+        fileName: "Export.xlsx",
+        filterable: true
+    },
+    pdf: {
+        fileName: "Export.pdf",
+        allPages: true
+    }
+});
+
+
+---------------------
+
+<div class="search-container" style="position: relative;">
+    <input type="text" id="customSearchBox" class="k-textbox" 
+           placeholder="Search..." style="padding-left: 30px; width: 200px;" />
+    <span class="k-icon k-i-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"></span>
+</div>
+
+--------------
+<button class="k-button k-button-icontext k-grid-excel export-button" title="Export to Excel">
+    <span class="k-icon k-i-file-excel"></span>Export to Excel
+</button>
+
+----------------
+
+/* Add a border and consistent styling for the export buttons */
+.export-button {
+    border: 1px solid #ddd; /* Light border */
+    padding: 5px 15px; /* Adjust button padding */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #fff; /* White background */
+    cursor: pointer;
+}
+
+.export-button:hover {
+    background-color: #f5f5f5; /* Light grey on hover */
+    border-color: #ccc; /* Darker border on hover */
+}
+
+/* Styling for the search icon inside the search box */
+.search-container {
+    position: relative;
+}
+
+.search-container .k-icon {
+    color: #aaa; /* Light grey icon color */
+    font-size: 14px;
+}
