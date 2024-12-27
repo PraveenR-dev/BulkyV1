@@ -1,0 +1,7 @@
+ {
+            name: "search",
+            text: `<div style="display: flex; align-items: center;">
+                      <span class="k-icon k-i-search" style="margin-right: 8px;"></span>
+                      <input id="toolbarSearchBox" type="text" placeholder="Search..." style="width: 200px; border: 1px solid #ccc; border-radius: 4px; padding: 6px;" />
+                   </div>`,
+        }
