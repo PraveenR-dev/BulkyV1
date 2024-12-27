@@ -1,0 +1,15 @@
+toolbar: [
+        {
+            template: `
+                <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+                    <button class="k-button k-button-icontext k-grid-excel" title="Export to Excel">
+                        <span class="k-icon k-i-file-excel"></span>Export to Excel
+                    </button>
+                    <button class="k-button k-button-icontext k-grid-pdf" title="Export to PDF" style="margin-left: 5px;">
+                        <span class="k-icon k-i-file-pdf"></span>Export to PDF
+                    </button>
+                    <input type="text" id="customSearchBox" class="k-textbox" 
+                           placeholder="Search..." style="margin-left: 15px; width: 200px;" />
+                </div>`
+        }
+    ],
