@@ -1,0 +1,58 @@
+
+
+
+
+
+
+TASK#TASKID-Name
+
+branch name
+
+
+While Clone Repo
+
+for global acccess
+
+https://stackoverflow.com/questions/76674926/vs-2022-error-encountered-while-pushing-to-the-remote-repository-git-failed-w
+
+ssh-keygen
+
+Cat C:\Users\ramasanp/.ssh/id_ed25519.pub
+ 
+SHA256:VBEhuOJgmAWsBULk/XcqEUA5ayGXQrQjxbFGQuCWy+g corp\ramasanp@5CG3073CZX
+
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKd9sU+LQvukbPqUiYIG3YB4gFvS9B1QuC/EmPw925Dd corp\ramasanp@5CG3073CZX
+
+UserStory#260592-Favourite
+
+
+select * from userMenuUtilization
+
+select * from UserMenuItemsUsage
+
+select * from MenuItem
+
+select PageId,TargetPath from PageSecurity
+
+select * from UserAccess
+
+select * from RolesInRoleGroup
+
+select * from FunctionPoint
+
+select * from UserMenuItemsUsage
+
+update UserMenuItemsUsage set AccessDate = '2014-11-11' where MenuItemKey = 10
+
+
+             //       menuUsageCount.LastAccessTime = new DateTime(DateTime.Now.Hour,DateTime.Now.Minute,DateTime.Now.Second);
+			 
+			 
+			 
+			 
+			 
+    //    private const string CacheKey = "UserMenuItems";
+        //public UserMenuItemsController()
+        //{
+        //    _cacheService = new CacheService();
+        //}
