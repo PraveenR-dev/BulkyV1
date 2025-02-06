@@ -1,0 +1,182 @@
+
+@model List<RTBAModPortal_MVC.Models.PageUsage>
+<div id="partialViewContainer" class="grid-container">
+    <div class="grid-header">
+        <h1 class="grid-title">User Menu Usage</h1>
+        <div class="grid-toolbar">
+            <label for="fromDate">From Date:</label>
+            <input id="fromDate" type="date" />
+            <label for="toDate">To Date:</label>
+            <input id="toDate" type="date" />
+            <button id="filterButton" class="modern-button">Apply Filter</button>
+        </div>
+    </div>
+    <div id="adminGrid" style="width:100%;height:100%;"></div>
+</div>
+@*<div class="grid-conatiner">
+    <div id="adminGrid"></div>
+</div>*@
+
+
+<script>
+    $(document).ready(function () {
+        $("#adminGrid").kendoGrid({
+            dataSource: {
+                data: @Html.Raw(Json.Encode(Model)), // Pass data to the grid
+                schema: {
+                    model: {
+                        fields: {
+                            Username: { type: "string" },
+                            PageName: { type: "string" },
+                            PageUrl: { type: "string" },
+                            TotalCount: { type: "number" },
+                            LastAccessDate: { type: "string" },
+                            LastAccessTime: { type: "string" }
+                        }
+                    }
+                },
+                pageSize: 10
+            },
+            pageable: {
+                refresh: true,
+                pageSizes: [5, 10, 20],
+                buttonCount: 5
+            },
+            sortable: true,
+            filterable: true,
+            scrollable: true,
+            height: 500,
+            detailTemplate: kendo.template($("#detail-template").html()), // Expandable detail row template
+            detailInit: function (e) {
+                $("<div/>").appendTo(e.detailCell).kendoGrid({
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: "/UserMenuUsage/GetPageDetails", // API for sub-grid
+                                data: { pageName: e.data.PageName }, // Pass PageName as parameter
+                                dataType: "json"
+                            }
+                        },
+                        schema: {
+                            model: {
+                                fields: {
+                                    PageName: { type: "string" },
+                                    PageUrl: { type: "string" },
+                                    AccessDate: { type: "string" },
+                                    AccessTime: { type: "string" },
+                                    Count: { type: "number" }
+                                }
+                            }
+                        }
+                    },
+                    pageable: false,
+                    sortable: true,
+                    columns: [
+                        { field: "PageName", title: "Page Name", width: "150px" },
+                        { field: "PageUrl", title: "Page URL", width: "250px" },
+                        { field: "AccessDate", title: "Access Date", width: "150px" },
+                        { field: "AccessTime", title: "Access Time", width: "150px" },
+                        { field: "Count", title: "Daily Count", width: "100px" }
+                    ]
+                });
+            },
+            columns: [
+                { field: "Username", title: "Username", width: "150px" },
+                { field: "PageName", title: "Page Name", width: "200px" },
+                { field: "PageUrl", title: "Page URL", width: "250px" },
+                { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+                { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                { field: "TotalCount", title: "Total Count", width: "100px" }
+            ]
+        });
+    });
+</script>
+
+<script type="text/x-kendo-template" id="detail-template">
+    <div>
+        <h5 class="sub-grid-title">Details for #: PageName #</h5>
+        <div></div>
+    </div>
+</script>
+<style>
+    /* General body styling */
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+    }
+
+    /* Center the grid in the page */
+    .grid-container {
+        max-width: 90%;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .grid-title {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .sub-grid-title {
+        margin: 10px 0;
+        font-size: 18px;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    /* Kendo Grid Customization */
+    .k-grid-header {
+        background-color: #007bff !important;
+        color: #fff !important;
+        font-weight: bold;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .k-grid-content {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .k-grouping-row {
+        background-color: #e9ecef;
+        font-weight: bold;
+    }
+
+    .k-detail-row {
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-left: 2px solid #007bff;
+        border-right: 2px solid #007bff;
+        border-bottom: 2px solid #007bff;
+    }
+
+    /* Row hover effect */
+    .k-grid-content tr:hover {
+        background-color: #f1f1f1 !important;
+    }
+
+    /* Responsive Design */
+    @*@media (max-width: 768px) {
+        .grid-container {
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        .grid-title {
+            font-size: 20px;
+        }
+
+        .k-grid-header {
+            font-size: 13px;
+        }
+    }*@
+</style>
