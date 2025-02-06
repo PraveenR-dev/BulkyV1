@@ -1,0 +1,81 @@
+
+@model List<RTBAModPortal_MVC.Models.PageUsage>
+
+<div id="adminGrid"></div>
+
+<script>
+    $(document).ready(function () {
+        $("#adminGrid").kendoGrid({
+            dataSource: {
+                data: @Html.Raw(Json.Encode(Model)), // Pass data to the grid
+                schema: {
+                    model: {
+                        fields: {
+                            Username: { type: "string" },
+                            PageName: { type: "string" },
+                            PageUrl: { type: "string" },
+                            TotalCount: { type: "number" },
+                            LastAccessDate: { type: "string" },
+                            LastAccessTime: { type: "string" }
+                        }
+                    }
+                },
+                pageSize: 10
+            },
+            pageable: true,
+            sortable: true,
+            filterable: true,
+            scrollable: true,
+            height: 500,
+            detailTemplate: kendo.template($("#detail-template").html()), // Expandable detail row template
+            detailInit: function (e) {
+                $("<div/>").appendTo(e.detailCell).kendoGrid({
+                    dataSource: {
+                        transport: {
+                            read: {
+                                url: "/UserMenuUsage/GetPageDetails", // API for sub-grid
+                                data: { pageName: e.data.PageName }, // Pass PageName as parameter
+                                dataType: "json"
+                            }
+                        },
+                        schema: {
+                            model: {
+                                fields: {
+                                    PageName: { type: "string" },
+                                    PageUrl: { type: "string" },
+                                    AccessDate: { type: "string" },
+                                    AccessTime: { type: "string" },
+                                    Count: { type: "number" }
+                                }
+                            }
+                        }
+                    },
+                    pageable: false,
+                    sortable: true,
+                    columns: [
+                        { field: "PageName", title: "Page Name", width: "150px" },
+                        { field: "PageUrl", title: "Page URL", width: "250px" },
+                        { field: "AccessDate", title: "Access Date", width: "150px" },
+                        { field: "AccessTime", title: "Access Time", width: "150px" },
+                        { field: "Count", title: "Daily Count", width: "100px" }
+                    ]
+                });
+            },
+            columns: [
+                { field: "Username", title: "Username", width: "150px" },
+                { field: "PageName", title: "Page Name", width: "200px" },
+                { field: "PageUrl", title: "Page URL", width: "250px" },
+                { field: "LastAccessDate", title: "Last Access Date", width: "150px" },
+                { field: "LastAccessTime", title: "Last Access Time", width: "150px" },
+                { field: "TotalCount", title: "Total Count", width: "100px" }
+            ]
+        });
+    });
+</script>
+
+<script type="text/x-kendo-template" id="detail-template">
+    <div>
+        <h5>Details for #: PageName #</h5>
+        <div></div>
+    </div>
+</script>
