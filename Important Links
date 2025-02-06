@@ -1,0 +1,83 @@
+https://learn.microsoft.com/en-us/archive/msdn-magazine/2009/february/best-practice-an-introduction-to-domain-driven-design
+
+https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/change-feed-processor?tabs=dotnet
+
+https://aws.amazon.com/event-driven-architecture/
+
+https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loggerextensions.beginscope?view=net-8.0
+
+
+https://www.reddit.com/r/csharp/comments/17ginjl/going_from_net_7_to_framework_48_what_am_i_going/?rdt=62574
+
+https://www.matheusmello.io/posts/asp.net-using-different-web-config-in-development-and-production-environment
+
+https://web.archive.org/web/20120621010228/http://blogs.msdn.com:80/b/webdevtools/archive/2009/05/04/web-deployment-web-config-transformation.aspx
+
+cant i switch to different environment using configuration manager in visual studio want to switch to web.prod.config? cant i switch in my local?
+
+https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions#expression-lambdas
+
+
+			 https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/migrate-from-newtonsoft?pivots=dotnet-9-0
+			 
+			 https://learn.microsoft.com/en-us/windows-server/security/windows-authentication/windows-authentication-concepts
+			 
+			 catalog task enbridge service management
+			 
+			 https://rite2rohit88.medium.com/best-practices-for-updating-cached-data-achieving-data-consistency-and-improved-performance-ee2cdd0eef09
+
+https://blog.postsharp.net/timeless
+
+https://www.strathweb.com/2018/03/lightweight-net-core-benchmarking-with-benchmarkdotnet-and-dotnet-script/
+
+https://www.linkedin.com/pulse/sql-dependency-maintain-data-cache-until-its-changed-japneet-singh
+
+https://www.4guysfromrolla.com/#google_vignette
+
+https://stellate.co/docs/graphql-edge-cache/cache-invalidation-methods
+
+which is the best one to use memory cache with invalidation or with sql dependency ?
+
+https://www.geeksforgeeks.org/cache-invalidation-and-the-methods-to-invalidate-cache/
+
+
+I  need a best approach when sql data changes manually , memory cache should be null and get data from database in c#  .net framework 4.8.1?
+
+https://medium.com/@vndpal/how-to-connect-net-web-api-with-sql-server-using-entity-framework-code-first-approach-8564192485c9
+
+
+https://debezium.io/blog/2018/12/05/automating-cache-invalidation-with-change-data-capture/
+
+
+	
+	https://stackoverflow.com/questions/49545659/proper-implementation-of-windows-authentication-in-web-api
+	
+	https://hazelcast.com/glossary/web-session/
+	
+	
+	
+	https://medium.com/@hendelRamzy/how-session-and-cookies-works-640fb3f349d1
+	
+	
+	https://forum.freecodecamp.org/t/why-sessionid-get-changed-in-every-request/451523
+	
+	https://www.linkedin.com/pulse/tutorial-jwt-token-aspnet-48-webapi-mohamed-ebrahim
+	
+	https://medium.com/@techvirtuoso
+	
+	https://www.baeldung.com/cs/rest-vs-http
+	
+	
+	
+https://deadlyapps.com/2013/03/sqldependency-copy-paste-tutorial.html
+
+https://stackoverflow.com/questions/11478244/asp-net-web-api-session-or-something
+
+
+github.com/PraveenR-dev/BulkyV1/tree/PraveenR-dev-patch-1
+
+	https://www.learnbestcoding.com/post/136/building-your-first-react-application
+			
+			https://getbootstrap.com/docs/5.0/getting-started/introduction/
+
+
